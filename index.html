@@ -1,0 +1,564 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>부대 성당</title>
+<meta name="description" content="미사 시간, 공지사항, 오시는 길, 상담 신청 안내">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@500;700&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f6f3ec;
+    --surface: #ffffff;
+    --ink: #1e2621;
+    --muted: #5f6a63;
+    --line: #e2ddd2;
+    --accent: #2f4a3a;      /* 짙은 올리브 그린 */
+    --accent-soft: #e6ece6;
+    --gold: #a9853d;
+    --danger: #a3392f;
+    --radius: 14px;
+    --shadow: 0 1px 2px rgba(30,38,33,.06), 0 4px 16px rgba(30,38,33,.05);
+    --serif: "Noto Serif KR", serif;
+    --sans: "Noto Sans KR", system-ui, -apple-system, "Apple SD Gothic Neo", sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; scroll-padding-top: 72px; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--sans); font-size: 16px; line-height: 1.65; -webkit-font-smoothing: antialiased; }
+  a { color: var(--accent); }
+  .wrap { max-width: 880px; margin: 0 auto; padding: 0 16px; }
+
+  /* 미리보기 안내 */
+  .preview-bar { background: #fff6dc; color: #6b5413; font-size: 13px; text-align: center; padding: 8px 16px; border-bottom: 1px solid #f0e2b4; }
+
+  /* 상단 메뉴 */
+  header.top { position: sticky; top: 0; z-index: 10; background: rgba(246,243,236,.92); backdrop-filter: blur(8px); border-bottom: 1px solid var(--line); }
+  header.top .wrap { display: flex; align-items: center; justify-content: space-between; height: 60px; gap: 12px; }
+  .brand { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--ink); font-family: var(--serif); font-weight: 700; font-size: 17px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .brand svg { flex: none; }
+  nav.menu { display: flex; gap: 4px; }
+  nav.menu a { text-decoration: none; color: var(--muted); font-size: 14px; padding: 6px 10px; border-radius: 8px; white-space: nowrap; }
+  nav.menu a:hover { background: var(--accent-soft); color: var(--accent); }
+  @media (max-width: 640px) { nav.menu { display: none; } }
+
+  /* 첫 화면 */
+  .hero { padding: 48px 0 28px; }
+  .hero h1 { font-family: var(--serif); font-size: clamp(28px, 6vw, 40px); line-height: 1.3; margin: 0 0 10px; letter-spacing: -0.01em; }
+  .hero p.lead { color: var(--muted); margin: 0 0 24px; font-size: 17px; }
+  .next { background: var(--accent); color: #fff; border-radius: var(--radius); padding: 20px 22px; display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; box-shadow: var(--shadow); }
+  .next .label { font-size: 13px; opacity: .8; letter-spacing: .04em; }
+  .next .when { font-family: var(--serif); font-size: 22px; font-weight: 700; margin-top: 2px; }
+  .next .where { font-size: 14px; opacity: .85; }
+  .quick { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 14px; }
+  .quick a { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 14px 8px; text-align: center; text-decoration: none; color: var(--ink); font-size: 14px; font-weight: 500; }
+  .quick a span { display: block; font-size: 20px; margin-bottom: 4px; }
+  .quick a:hover { border-color: var(--accent); }
+  @media (max-width: 480px) { .quick { grid-template-columns: repeat(2, 1fr); } }
+
+  /* 섹션 공통 */
+  section.block { padding: 36px 0; }
+  .block h2 { font-family: var(--serif); font-size: 24px; margin: 0 0 4px; }
+  .block .sub { color: var(--muted); margin: 0 0 18px; font-size: 14px; }
+  .card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); }
+
+  /* 미사 시간 */
+  .mass-list { display: grid; gap: 10px; }
+  .mass { display: grid; grid-template-columns: 92px 1fr; gap: 14px; padding: 16px 18px; align-items: center; }
+  .mass .day { font-weight: 700; color: var(--accent); }
+  .mass .time { font-family: var(--serif); font-size: 22px; font-weight: 700; line-height: 1.1; }
+  .mass .name { font-weight: 500; }
+  .mass .meta { color: var(--muted); font-size: 14px; }
+  .change { background: #fff8e6; border: 1px solid #ecd9a6; border-left: 4px solid var(--gold); border-radius: 12px; padding: 14px 16px; margin-bottom: 10px; font-size: 14px; color: #5a4a22; }
+  .change b { display: block; font-size: 16px; color: var(--ink); margin-bottom: 2px; }
+  .next .tag { display: inline-block; margin-left: 6px; background: var(--gold); color: #fff; font-size: 11px; font-weight: 700; padding: 1px 8px; border-radius: 999px; letter-spacing: 0; vertical-align: 1px; }
+
+  /* 공지사항 */
+  .notices { display: grid; gap: 10px; }
+  details.notice { padding: 0; }
+  details.notice summary { list-style: none; cursor: pointer; padding: 16px 18px; display: flex; gap: 12px; align-items: baseline; }
+  details.notice summary::-webkit-details-marker { display: none; }
+  details.notice summary .t { flex: 1; font-weight: 500; }
+  details.notice summary .d { color: var(--muted); font-size: 13px; white-space: nowrap; }
+  details.notice .pin { font-size: 12px; color: var(--gold); border: 1px solid var(--gold); border-radius: 999px; padding: 0 8px; white-space: nowrap; }
+  details.notice .body { padding: 0 18px 18px; color: #36403a; white-space: pre-line; border-top: 1px dashed var(--line); padding-top: 14px; margin: 0 18px; padding-left: 0; padding-right: 0; }
+  details.notice[open] summary .t { color: var(--accent); }
+  details.notice summary { align-items: center; }
+  details.notice .thumb { width: 48px; height: 32px; object-fit: cover; border-radius: 6px; flex: none; }
+  details.notice[open] .thumb { display: none; }
+  details.notice .photo { display: block; width: 100%; height: auto; border-radius: 10px; margin-bottom: 12px; }
+  .more { margin-top: 12px; background: none; border: 1px solid var(--line); border-radius: 10px; padding: 10px; width: 100%; font: inherit; color: var(--muted); cursor: pointer; }
+
+  /* 오시는 길 */
+  .way { padding: 20px 22px; display: grid; gap: 16px; }
+  .way dl { margin: 0; display: grid; grid-template-columns: 88px 1fr; gap: 10px 14px; }
+  .way dt { color: var(--muted); font-size: 14px; }
+  .way dd { margin: 0; white-space: pre-line; }
+  .btn { display: inline-block; background: var(--accent); color: #fff; text-decoration: none; padding: 10px 16px; border-radius: 10px; font-weight: 500; font-size: 15px; border: 0; cursor: pointer; font-family: inherit; }
+  .btn.ghost { background: var(--surface); color: var(--accent); border: 1px solid var(--accent); }
+
+  /* 상담 신청 */
+  .help { background: #fbefec; border: 1px solid #efd3cd; color: #6e2a22; border-radius: 12px; padding: 14px 16px; font-size: 14px; margin-bottom: 14px; }
+  .help b { color: var(--danger); }
+  form.consult { padding: 22px; display: grid; gap: 16px; }
+  .field label.lb { display: block; font-weight: 500; font-size: 15px; margin-bottom: 6px; }
+  .field .hint { color: var(--muted); font-size: 13px; font-weight: 400; }
+  .req { color: var(--danger); }
+  input[type=text], input[type=tel], select, textarea { width: 100%; font: inherit; color: var(--ink); background: #fcfbf8; border: 1px solid var(--line); border-radius: 10px; padding: 11px 12px; }
+  input:focus, select:focus, textarea:focus { outline: 2px solid var(--accent); outline-offset: 1px; border-color: var(--accent); }
+  textarea { min-height: 110px; resize: vertical; }
+  .two { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 560px) { .two { grid-template-columns: 1fr; } }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chips label { border: 1px solid var(--line); border-radius: 999px; padding: 7px 14px; cursor: pointer; font-size: 14px; background: #fcfbf8; }
+  .chips input { position: absolute; opacity: 0; pointer-events: none; }
+  .chips input:checked + span { color: var(--accent); font-weight: 700; }
+  .chips label:has(input:checked) { border-color: var(--accent); background: var(--accent-soft); }
+  .chips label:has(input:focus-visible) { outline: 2px solid var(--accent); }
+  .privacy { background: #f8f6f1; border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; font-size: 13px; color: var(--muted); }
+  .privacy ul { margin: 6px 0 10px; padding-left: 18px; }
+  .agree { display: flex; gap: 8px; align-items: flex-start; color: var(--ink); font-size: 14px; }
+  .agree input { margin-top: 4px; width: 18px; height: 18px; accent-color: var(--accent); }
+  .hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+  .submit-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+  .submit-row .btn { padding: 13px 22px; font-size: 16px; }
+  .submit-row .btn[disabled] { opacity: .6; cursor: wait; }
+  .msg { font-size: 14px; }
+  .msg.err { color: var(--danger); }
+  .done { padding: 28px 22px; text-align: center; }
+  .done h3 { font-family: var(--serif); margin: 8px 0; font-size: 22px; }
+  .done p { color: var(--muted); margin: 0 0 6px; }
+
+  .empty { color: var(--muted); padding: 18px; text-align: center; font-size: 14px; }
+  .skel { height: 64px; border-radius: var(--radius); background: linear-gradient(90deg, #ece8df 0%, #f4f1ea 50%, #ece8df 100%); background-size: 200% 100%; animation: sh 1.2s infinite; }
+  @keyframes sh { to { background-position: -200% 0; } }
+
+  footer { border-top: 1px solid var(--line); padding: 28px 0 40px; color: var(--muted); font-size: 13px; margin-top: 20px; }
+</style>
+</head>
+<body>
+
+<div id="previewBar" class="preview-bar" hidden>설정 전 미리보기입니다. 아래 내용은 예시이며, 상담 신청은 실제로 접수되지 않습니다.</div>
+
+<header class="top">
+  <div class="wrap">
+    <a class="brand" href="#">
+      <svg width="28" height="28" viewBox="0 0 28 28" aria-hidden="true"><circle cx="14" cy="14" r="13" fill="#2f4a3a"/><path d="M14 6v16M9 11h10" stroke="#f6f3ec" stroke-width="2.4" stroke-linecap="round"/></svg>
+      <span data-info="성당이름">부대 성당</span>
+    </a>
+    <nav class="menu" aria-label="주 메뉴">
+      <a href="#mass">미사 시간</a>
+      <a href="#notice">공지사항</a>
+      <a href="#way">오시는 길</a>
+      <a href="#consult">상담 신청</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <div class="wrap">
+    <section class="hero">
+      <h1 data-info="성당이름">부대 성당</h1>
+      <p class="lead" data-info="소개">언제든 편하게 찾아오세요.</p>
+
+      <div class="next" id="nextMass">
+        <div>
+          <div class="label" id="nextLabel">다음 미사</div>
+          <div class="when" id="nextWhen">불러오는 중…</div>
+          <div class="where" id="nextWhere"></div>
+        </div>
+        <a class="btn ghost" href="#mass" style="background:#fff">전체 시간표</a>
+      </div>
+
+      <div class="quick">
+        <a href="#mass"><span>⛪</span>미사 시간</a>
+        <a href="#notice"><span>📢</span>공지사항</a>
+        <a href="#way"><span>🧭</span>오시는 길</a>
+        <a href="#consult"><span>🕊️</span>상담 신청</a>
+      </div>
+    </section>
+
+    <section class="block" id="mass">
+      <h2>미사 · 성사 시간</h2>
+      <p class="sub">일정에 따라 바뀔 수 있으니 공지사항도 함께 확인해 주세요.</p>
+      <div id="changeList"></div>
+      <div class="mass-list" id="massList"><div class="skel"></div><div class="skel"></div></div>
+    </section>
+
+    <section class="block" id="notice">
+      <h2>공지사항</h2>
+      <p class="sub">제목을 누르면 내용이 펼쳐집니다.</p>
+      <div class="notices" id="noticeList"><div class="skel"></div><div class="skel"></div><div class="skel"></div></div>
+      <button class="more" id="moreBtn" hidden>이전 공지 더 보기</button>
+    </section>
+
+    <section class="block" id="way">
+      <h2>오시는 길</h2>
+      <p class="sub">처음 오시는 분도 쉽게 찾을 수 있도록 안내해 드립니다.</p>
+      <div class="card way">
+        <dl>
+          <dt>위치</dt><dd data-info="주소">-</dd>
+          <dt>찾아오기</dt><dd data-info="오시는길">-</dd>
+          <dt>연락처</dt><dd data-info="연락처">-</dd>
+          <dt>면담 시간</dt><dd data-info="사무실시간">-</dd>
+        </dl>
+        <div id="mapWrap" hidden><a class="btn ghost" id="mapLink" target="_blank" rel="noopener">지도에서 보기</a></div>
+      </div>
+    </section>
+
+    <section class="block" id="consult">
+      <h2>상담 신청</h2>
+      <p class="sub">신앙 문제든 개인적인 고민이든 괜찮습니다. 신청 내용은 신부님만 확인하며, 남겨주신 연락처로 따로 연락드립니다.</p>
+
+      <div class="help">
+        지금 많이 힘드시다면 기다리지 말고 바로 전화하세요.<br>
+        <b>국방헬프콜 1303</b> (24시간) · <b>자살예방상담전화 109</b> (24시간)
+      </div>
+
+      <div class="card" id="consultBox">
+        <form class="consult" id="consultForm" novalidate>
+          <div class="two">
+            <div class="field">
+              <label class="lb" for="f-name">이름 또는 세례명 <span class="req">*</span></label>
+              <input type="text" id="f-name" name="name" maxlength="40" autocomplete="name" required>
+            </div>
+            <div class="field">
+              <label class="lb" for="f-unit">소속 <span class="hint">(선택)</span></label>
+              <input type="text" id="f-unit" name="unit" maxlength="60" placeholder="예: ○○실 ○○과">
+            </div>
+          </div>
+
+          <div class="field">
+            <label class="lb" for="f-contact">연락받을 방법 <span class="req">*</span></label>
+            <input type="text" id="f-contact" name="contact" maxlength="80" placeholder="휴대폰 번호 또는 사무실 전화" required>
+          </div>
+
+          <div class="field">
+            <span class="lb">상담 분야</span>
+            <div class="chips" role="radiogroup" aria-label="상담 분야">
+              <label><input type="radio" name="topic" value="개인 고민" checked><span>개인 고민</span></label>
+              <label><input type="radio" name="topic" value="신앙 상담"><span>신앙 상담</span></label>
+              <label><input type="radio" name="topic" value="고해성사"><span>고해성사</span></label>
+            </div>
+          </div>
+
+          <div class="two">
+            <div class="field">
+              <span class="lb">상담 방식</span>
+              <div class="chips" role="radiogroup" aria-label="상담 방식">
+                <label><input type="radio" name="method" value="상관없음" checked><span>상관없음</span></label>
+                <label><input type="radio" name="method" value="대면"><span>대면</span></label>
+                <label><input type="radio" name="method" value="전화"><span>전화</span></label>
+              </div>
+            </div>
+            <div class="field">
+              <label class="lb" for="f-when">편한 시간 <span class="hint">(선택)</span></label>
+              <input type="text" id="f-when" name="when" maxlength="80" placeholder="예: 수요일 점심시간">
+            </div>
+          </div>
+
+          <div class="field">
+            <label class="lb" for="f-msg">하고 싶은 이야기 <span class="hint">(선택 · 자세히 적지 않아도 됩니다)</span></label>
+            <textarea id="f-msg" name="message" maxlength="1500"></textarea>
+          </div>
+
+          <div class="hp" aria-hidden="true"><label>웹사이트 <input type="text" name="website" tabindex="-1" autocomplete="off"></label></div>
+
+          <div class="privacy">
+            <b>개인정보 수집·이용 안내</b>
+            <ul>
+              <li>수집 항목: 이름(세례명), 소속, 연락 방법, 상담 내용</li>
+              <li>이용 목적: 상담 일정 연락 및 진행</li>
+              <li>보관 기간: 상담이 끝나면 지체 없이 삭제</li>
+            </ul>
+            동의하지 않으셔도 되지만, 그 경우 온라인 신청은 어렵습니다. 미사 후 직접 말씀해 주셔도 됩니다.
+          </div>
+          <label class="agree"><input type="checkbox" name="agree" id="f-agree"> 위 내용에 동의합니다. <span class="req">*</span></label>
+
+          <div class="submit-row">
+            <button class="btn" type="submit" id="submitBtn">상담 신청하기</button>
+            <span class="msg" id="formMsg" role="status" aria-live="polite"></span>
+          </div>
+        </form>
+      </div>
+    </section>
+  </div>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div data-info="성당이름">부대 성당</div>
+    <div id="updated"></div>
+  </div>
+</footer>
+
+<script>
+/* =========================================================
+ * 설정: 구글 Apps Script를 배포한 뒤 받은 주소를 아래에 붙여넣으세요.
+ * 비워두면 예시 내용으로 미리보기만 됩니다.
+ * ========================================================= */
+const SCRIPT_URL = '';
+
+/* 미리보기용 예시 데이터 (실제 내용은 구글 스프레드시트에서 관리) */
+const SAMPLE = {
+  info: {
+    '성당이름': '국방부 직원 성당',
+    '소개': '환영합니다',
+    '주소': '국방부 후문 앞 군종교구청 1층 경당',
+    '오시는길': '군종교구청으로 오셔서 전화 주세요.',
+    '연락처': '010-1234-5678',
+    '사무실시간': '화–금 12:00–13:00',
+    '지도링크': 'https://map.naver.com/p/search/%EC%B2%9C%EC%A3%BC%EA%B5%90%20%EA%B5%B0%EC%A2%85%EA%B5%90%EA%B5%AC%EC%B2%AD'
+  },
+  masses: [
+    { '이름': '직원미사', '요일': '목', '시간': '11:45', '장소': '군종교구청 경당', '비고': '' }
+  ],
+  notices: [
+    { '날짜': '2026-11-04', '제목': '미사 후 컵라면·김밥 나눔', '내용': '이번 주 미사(11월 5일 목요일)부터 미사 후에 컵라면과 김밥을 드립니다.\n점심시간에 드리는 미사인 만큼, 미사 마치고 간단히 요기하고 가세요.', '고정': '', '이미지': 'images/ramen-gimbap.svg' },
+    { '날짜': '2026-11-04', '제목': '직원미사 안내', '내용': '직원미사는 매주 목요일 11:45에 있습니다.\n수요일이나 금요일로 바뀌는 주에는 홈페이지 첫 화면과 미사 시간에 따로 안내합니다.', '고정': 'Y' }
+  ],
+  // 미리보기용 예시: 다음 주 금요일로 변경 (실제로는 구글 시트 '미사변경' 탭에서 관리)
+  changes: [
+    { '날짜': (() => { const d = new Date(); d.setDate(d.getDate() + ((5 - d.getDay() + 7) % 7) + 7); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; })(), '시간': '', '장소': '', '안내': '', '이름': '' }
+  ]
+};
+
+const DAYS = ['일', '월', '화', '수', '목', '금', '토'];
+const DAY_ORDER = [0, 1, 2, 3, 4, 5, 6]; // 주일 먼저
+const CACHE_KEY = 'church-data-v1';
+const NOTICE_PAGE = 5;
+
+const $ = (s) => document.querySelector(s);
+const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+/* '일', '주일', '월,수,금', '평일', '매일' 등을 요일 번호 목록으로 */
+function parseDays(text) {
+  const t = String(text || '').replace(/요일/g, '').trim();
+  if (!t) return [];
+  if (t.includes('매일')) return [0, 1, 2, 3, 4, 5, 6];
+  if (t.includes('평일')) return [1, 2, 3, 4, 5];
+  const out = new Set();
+  t.split(/[,\s·/]+/).forEach((tok) => {
+    if (!tok) return;
+    if (tok.startsWith('주일')) { out.add(0); return; }
+    const range = tok.match(/^([일월화수목금토])\s*[-~–]\s*([일월화수목금토])$/);
+    if (range) {
+      let a = DAYS.indexOf(range[1]), b = DAYS.indexOf(range[2]);
+      for (let i = a; ; i = (i + 1) % 7) { out.add(i); if (i === b) break; }
+      return;
+    }
+    for (const ch of tok) { const i = DAYS.indexOf(ch); if (i >= 0) out.add(i); }
+  });
+  return [...out];
+}
+function parseTime(text) {
+  const m = String(text || '').match(/(\d{1,2})\s*[:시]\s*(\d{2})?/);
+  return m ? { h: +m[1], m: +(m[2] || 0) } : null;
+}
+function dayLabel(text) {
+  const t = String(text || '').trim();
+  if (t === '일' || t === '일요일') return '주일';
+  return /^[월화수목금토]$/.test(t) ? t + '요일' : t;
+}
+
+/* ---------- 미사 요일 변경 ----------
+ * '미사변경' 탭에 바뀌는 주만 한 줄씩 적습니다.
+ * 같은 주(월~일)의 평소 미사는 자동으로 숨기고, 변경된 날짜로 안내합니다.
+ * 시간·장소를 비우면 평소 값을 쓰고, 시간에 '없음'을 쓰면 그 주는 미사가 없습니다. */
+const CANCEL_RE = /없음|쉼|휴무|취소/;
+const isMassRow = (r) => /미사/.test(r['이름'] || '');
+const pad2 = (n) => String(n).padStart(2, '0');
+const startOfDay = (d) => { const x = new Date(d); x.setHours(0, 0, 0, 0); return x; };
+function weekKey(d) { const x = startOfDay(d); x.setDate(x.getDate() - ((x.getDay() + 6) % 7)); return x.getTime(); }
+function parseDate(text) {
+  const t = String(text || '');
+  let m = t.match(/(\d{4})\D+(\d{1,2})\D+(\d{1,2})/);
+  if (m) return new Date(+m[1], +m[2] - 1, +m[3]);
+  m = t.match(/^\s*(\d{1,2})\D+(\d{1,2})/);
+  if (m) return new Date(new Date().getFullYear(), +m[1] - 1, +m[2]);
+  return null;
+}
+/* 공지 이미지: 인터넷 주소(https://…) 또는 홈페이지 폴더 안의 파일(images/…)만 허용 */
+function safeImg(v) {
+  const u = String(v || '').trim();
+  if (/^https:\/\/[^\s"'<>]+$/i.test(u)) return u;
+  if (/^[\w\-./가-힣]+\.(png|jpe?g|gif|webp|svg)$/i.test(u) && !u.includes('..') && !u.startsWith('/')) return u;
+  return '';
+}
+function dateLabel(d) { return `${d.getMonth() + 1}월 ${d.getDate()}일(${DAYS[d.getDay()]})`; }
+
+function normChanges(rows, masses) {
+  const base = masses.find(isMassRow) || masses[0] || {};
+  return (rows || []).map((c) => {
+    const date = parseDate(c['날짜']);
+    if (!date) return null;
+    const cancel = CANCEL_RE.test(c['시간'] || '');
+    const tm = parseTime(c['시간']) || parseTime(base['시간']);
+    const dt = new Date(date);
+    if (tm) dt.setHours(tm.h, tm.m, 0, 0);
+    return {
+      date, dt, week: weekKey(date), cancel,
+      name: c['이름'] || base['이름'] || '미사',
+      specific: !!c['이름'],
+      place: c['장소'] || base['장소'] || '',
+      note: c['안내'] || '',
+      baseDay: dayLabel(base['요일']),
+    };
+  }).filter(Boolean).sort((a, b) => a.dt - b.dt);
+}
+
+/* 앞으로 3주간의 실제 미사 일정 (변경 반영) */
+function upcoming(masses, changes) {
+  const now = new Date(), list = [];
+  for (let i = 0; i < 21; i++) {
+    const day = startOfDay(now); day.setDate(day.getDate() + i);
+    masses.forEach((r) => {
+      if (!parseDays(r['요일']).includes(day.getDay())) return;
+      const tm = parseTime(r['시간']); if (!tm) return;
+      const replaced = changes.some((c) => c.week === weekKey(day) && (c.specific ? c.name === r['이름'] : isMassRow(r)));
+      if (replaced) return;
+      const dt = new Date(day); dt.setHours(tm.h, tm.m, 0, 0);
+      list.push({ dt, name: r['이름'], place: r['장소'] || '' });
+    });
+  }
+  changes.forEach((c) => { if (!c.cancel) list.push({ dt: c.dt, name: c.name, place: c.place, changed: c }); });
+  return list.filter((x) => x.dt > now).sort((a, b) => a.dt - b.dt);
+}
+
+function render(data) {
+  const info = data.info || {};
+  document.querySelectorAll('[data-info]').forEach((el) => {
+    const v = info[el.dataset.info];
+    if (v) el.textContent = v;
+  });
+  if (info['성당이름']) document.title = info['성당이름'];
+  if (info['지도링크']) { $('#mapLink').href = info['지도링크']; $('#mapWrap').hidden = false; }
+
+  // 미사 시간
+  const masses = (data.masses || []).slice().sort((a, b) => {
+    const da = DAY_ORDER.indexOf(parseDays(a['요일'])[0] ?? 9), db = DAY_ORDER.indexOf(parseDays(b['요일'])[0] ?? 9);
+    if (da !== db) return (da < 0 ? 99 : da) - (db < 0 ? 99 : db);
+    const ta = parseTime(a['시간']), tb = parseTime(b['시간']);
+    return (ta ? ta.h * 60 + ta.m : 0) - (tb ? tb.h * 60 + tb.m : 0);
+  });
+  $('#massList').innerHTML = masses.length ? masses.map((r) => `
+    <div class="card mass">
+      <div><div class="day">${esc(dayLabel(r['요일']))}</div><div class="time">${esc(r['시간'])}</div></div>
+      <div><div class="name">${esc(r['이름'])}</div>
+        <div class="meta">${esc([r['장소'], r['비고']].filter(Boolean).join(' · '))}</div></div>
+    </div>`).join('') : '<div class="card empty">등록된 미사 시간이 없습니다.</div>';
+
+  // 요일 변경 안내
+  const changes = normChanges(data.changes, masses);
+  const today = startOfDay(new Date());
+  const active = changes.filter((c) => c.date >= today).slice(0, 3);
+  $('#changeList').innerHTML = active.map((c) => c.cancel
+    ? `<div class="change"><b>${esc(dateLabel(c.date))}이 있는 주 · ${esc(c.name)} 없음</b>
+         <div>${esc(c.note || '이번 주는 미사가 없습니다.')}</div></div>`
+    : `<div class="change"><b>${esc(dateLabel(c.date))} ${pad2(c.dt.getHours())}:${pad2(c.dt.getMinutes())} · ${esc(c.name)}</b>
+         <div>${esc(c.note || (c.baseDay ? `이번 주는 ${c.baseDay} 대신 ${DAYS[c.date.getDay()]}요일에 드립니다.` : '이번 주 미사 일정이 바뀌었습니다.'))}${c.place ? ' · ' + esc(c.place) : ''}</div></div>`
+  ).join('');
+
+  const all = upcoming(masses, changes);
+  const massOnly = all.filter((x) => /미사/.test(x.name));
+  const nx = (massOnly.length ? massOnly : all)[0];
+  if (nx) {
+    const diff = Math.round((startOfDay(nx.dt) - today) / 86400000);
+    const rel = diff === 0 ? '오늘' : diff === 1 ? '내일' : dateLabel(nx.dt);
+    $('#nextLabel').innerHTML = nx.changed ? '다음 미사 <span class="tag">요일 변경</span>' : '다음 미사';
+    $('#nextWhen').textContent = `${rel} ${pad2(nx.dt.getHours())}:${pad2(nx.dt.getMinutes())} · ${nx.name}`;
+    $('#nextWhere').textContent = nx.place;
+  } else {
+    $('#nextLabel').textContent = '다음 미사';
+    $('#nextWhen').textContent = '시간표를 확인해 주세요';
+    $('#nextWhere').textContent = '';
+  }
+
+  // 공지사항: 고정 먼저, 그다음 최신순
+  const notices = (data.notices || []).slice().sort((a, b) => {
+    const pa = /^(y|yes|o|고정|1|true)$/i.test(String(a['고정'] || '').trim());
+    const pb = /^(y|yes|o|고정|1|true)$/i.test(String(b['고정'] || '').trim());
+    if (pa !== pb) return pa ? -1 : 1;
+    return String(b['날짜']).localeCompare(String(a['날짜']));
+  });
+  let shown = NOTICE_PAGE;
+  const drawNotices = () => {
+    $('#noticeList').innerHTML = notices.length ? notices.slice(0, shown).map((n) => {
+      const pin = /^(y|yes|o|고정|1|true)$/i.test(String(n['고정'] || '').trim());
+      const img = safeImg(n['이미지']);
+      return `<details class="card notice">
+        <summary>${pin ? '<span class="pin">필독</span>' : ''}<span class="t">${esc(n['제목'])}</span>${img ? `<img class="thumb" src="${esc(img)}" alt="" loading="lazy">` : ''}<span class="d">${esc(n['날짜'])}</span></summary>
+        <div class="body">${img ? `<img class="photo" src="${esc(img)}" alt="${esc(n['제목'])}" loading="lazy">` : ''}${esc(n['내용'])}</div>
+      </details>`;
+    }).join('') : '<div class="card empty">새 공지가 없습니다.</div>';
+    $('#moreBtn').hidden = notices.length <= shown;
+  };
+  $('#moreBtn').onclick = () => { shown += NOTICE_PAGE; drawNotices(); };
+  drawNotices();
+
+  if (data.updated) {
+    const d = new Date(data.updated);
+    if (!isNaN(d)) $('#updated').textContent = `최근 확인: ${d.toLocaleString('ko-KR', { dateStyle: 'medium', timeStyle: 'short' })}`;
+  }
+}
+
+async function load() {
+  if (!SCRIPT_URL) { $('#previewBar').hidden = false; render(SAMPLE); return; }
+  // 이전에 받아둔 내용을 먼저 보여주고, 최신 내용으로 교체
+  try { const c = localStorage.getItem(CACHE_KEY); if (c) render(JSON.parse(c)); } catch (e) {}
+  try {
+    const res = await fetch(SCRIPT_URL + '?t=' + Date.now());
+    const data = await res.json();
+    render(data);
+    try { localStorage.setItem(CACHE_KEY, JSON.stringify(data)); } catch (e) {}
+  } catch (e) {
+    if (!$('#massList .mass')) {
+      $('#massList').innerHTML = '<div class="card empty">내용을 불러오지 못했습니다. 잠시 후 다시 열어주세요.</div>';
+      $('#noticeList').innerHTML = '';
+      $('#nextWhen').textContent = '불러오기 실패';
+    }
+  }
+}
+
+/* 상담 신청 */
+$('#consultForm').addEventListener('submit', async (ev) => {
+  ev.preventDefault();
+  const f = ev.target, msg = $('#formMsg'), btn = $('#submitBtn');
+  msg.className = 'msg'; msg.textContent = '';
+  const data = Object.fromEntries(new FormData(f).entries());
+  data.agree = $('#f-agree').checked;
+
+  if (!data.name.trim()) { msg.className = 'msg err'; msg.textContent = '이름 또는 세례명을 적어주세요.'; $('#f-name').focus(); return; }
+  if (!data.contact.trim()) { msg.className = 'msg err'; msg.textContent = '연락받을 방법을 적어주세요.'; $('#f-contact').focus(); return; }
+  if (!data.agree) { msg.className = 'msg err'; msg.textContent = '개인정보 수집·이용에 동의해 주세요.'; $('#f-agree').focus(); return; }
+
+  btn.disabled = true; btn.textContent = '보내는 중…';
+  try {
+    let out;
+    if (!SCRIPT_URL) {
+      await new Promise((r) => setTimeout(r, 600));
+      out = { ok: true, preview: true };
+    } else {
+      const res = await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(data) });
+      out = await res.json();
+    }
+    if (!out.ok) throw new Error(out.error || '접수 실패');
+    $('#consultBox').innerHTML = `<div class="done">
+      <div style="font-size:34px">🕊️</div>
+      <h3>신청이 접수되었습니다</h3>
+      <p>확인하는 대로 남겨주신 방법으로 연락드리겠습니다.</p>
+      <p>면담은 보통 화–금 점심시간(12:00–13:00)에 가능합니다.</p>
+      ${out.preview ? '<p style="color:#6b5413;margin-top:10px">(미리보기라 실제로 접수되지는 않았습니다)</p>' : ''}
+    </div>`;
+  } catch (e) {
+    msg.className = 'msg err';
+    msg.textContent = '전송에 실패했습니다. 잠시 후 다시 시도하시거나 미사 후 직접 말씀해 주세요.';
+    btn.disabled = false; btn.textContent = '상담 신청하기';
+  }
+});
+
+load();
+</script>
+</body>
+</html>
