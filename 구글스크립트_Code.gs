@@ -12,6 +12,21 @@
 // 알림 메일에는 신청 내용이 담기지 않고 "새 신청이 있다"는 사실만 갑니다.
 const 알림이메일 = '';
 
+/* ---------- 카카오톡 '나에게 보내기' 알림 ----------
+ * 연결 방법은 설정안내.md의 "카카오톡 알림 연결"을 보세요.
+ * 아래 값은 Apps Script 화면에서만 채우고, GitHub 등 다른 곳에는 올리지 마세요.
+ * kakaoConnect를 한 번 실행하면 값이 안전한 저장소(스크립트 속성)로 옮겨지므로,
+ * 그 뒤에는 다시 비워두거나 새 코드로 바꿔 붙여넣어도 알림이 계속 옵니다. */
+const KAKAO = {
+  REST_KEY: '',        // 카카오 개발자 > 내 애플리케이션 > 앱 키 > REST API 키
+  CLIENT_SECRET: '',   // 보안 > Client Secret을 '사용함'으로 해둔 경우에만
+  REDIRECT_URI: 'https://mnd-chapel.vercel.app/',
+  CODE: '',            // 동의 후 주소창의 ?code= 뒤 값 (10분 안에 한 번만 사용 가능)
+};
+// true로 바꾸면 카톡 알림에 신청자 이름과 연락 방법도 함께 보냅니다.
+// 기본값(false)은 접수번호·분야·방식만 보내고, 상담 내용은 어떤 경우에도 보내지 않습니다.
+const 카카오_이름연락포함 = false;
+
 const 탭 = {
   정보: '기본정보',
   미사: '미사시간',
@@ -73,12 +88,30 @@ function doPost(e) {
     const r = sh.getLastRow() + 1;
     sh.getRange(r, 1, 1, 행.length).setNumberFormat('@').setValues([행]);
 
+    // 알림은 실패해도 신청 접수에는 영향이 없도록 따로 처리
     if (알림이메일) {
-      MailApp.sendEmail(
-        알림이메일,
-        '[성당 홈페이지] 새 상담 신청이 있습니다',
-        '새 상담 신청이 1건 접수되었습니다.\n아래 스프레드시트의 "상담신청" 탭에서 확인해 주세요.\n\n' + ss.getUrl()
-      );
+      try {
+        MailApp.sendEmail(
+          알림이메일,
+          '[성당 홈페이지] 새 상담 신청이 있습니다',
+          '새 상담 신청이 1건 접수되었습니다.\n아래 스프레드시트의 "상담신청" 탭에서 확인해 주세요.\n\n' + ss.getUrl()
+        );
+      } catch (mailErr) { console.error('메일 알림 실패: ' + mailErr.message); }
+    }
+    if (카카오연결됨_()) {
+      try {
+        const 줄 = [
+          '🕊️ 새 상담 신청이 들어왔습니다',
+          '접수번호: ' + 번호,
+          '분야: ' + (d.topic || '-') + ' · 방식: ' + (d.method || '-'),
+        ];
+        if (카카오_이름연락포함) {
+          줄.push('이름: ' + 이름);
+          줄.push('연락: ' + 연락);
+        }
+        줄.push('시트의 "상담신청" 탭에서 확인해 주세요.');
+        카카오보내기_(줄.join('\n'), ss.getUrl());
+      } catch (kakaoErr) { console.error('카카오 알림 실패: ' + kakaoErr.message); }
     }
     return json_({ ok: true, id: 번호 });
   } catch (err) {
@@ -86,6 +119,115 @@ function doPost(e) {
   } finally {
     try { lock.releaseLock(); } catch (e) {}
   }
+}
+
+/* ---------- 카카오톡 알림: 직접 실행하는 함수 ---------- */
+
+// 1) 처음 한 번: KAKAO.REST_KEY와 KAKAO.CODE를 채우고 이 함수를 실행
+function kakaoConnect() {
+  const p = PropertiesService.getScriptProperties();
+  const key = KAKAO.REST_KEY.trim() || p.getProperty('KAKAO_REST_KEY');
+  const secret = KAKAO.CLIENT_SECRET.trim() || p.getProperty('KAKAO_CLIENT_SECRET') || '';
+  if (!key) throw new Error('KAKAO.REST_KEY에 REST API 키를 먼저 넣고 저장하세요.');
+  if (!KAKAO.CODE.trim()) throw new Error('KAKAO.CODE에 주소창의 code 값을 넣고 저장하세요.');
+
+  const payload = {
+    grant_type: 'authorization_code',
+    client_id: key,
+    redirect_uri: KAKAO.REDIRECT_URI,
+    code: KAKAO.CODE.trim(),
+  };
+  if (secret) payload.client_secret = secret;
+  const j = 카카오요청_('https://kauth.kakao.com/oauth/token', payload);
+  if (!j.access_token) throw new Error('토큰 발급 실패: ' + JSON.stringify(j));
+
+  p.setProperties({
+    KAKAO_REST_KEY: key,
+    KAKAO_CLIENT_SECRET: secret,
+    KAKAO_ACCESS: j.access_token,
+    KAKAO_REFRESH: j.refresh_token,
+    KAKAO_ACCESS_EXP: String(Date.now() + (Number(j.expires_in) - 300) * 1000),
+  });
+
+  // 오랫동안 신청이 없어도 연결이 끊기지 않도록 매주 한 번 자동 갱신
+  ScriptApp.getProjectTriggers()
+    .filter((t) => t.getHandlerFunction() === 'kakaoRefresh')
+    .forEach((t) => ScriptApp.deleteTrigger(t));
+  ScriptApp.newTrigger('kakaoRefresh').timeBased().everyWeeks(1).create();
+
+  카카오보내기_('✅ 성당 홈페이지 상담 알림이 카카오톡에 연결되었습니다.', SpreadsheetApp.getActiveSpreadsheet().getUrl());
+  console.log('카카오톡 연결 완료. 카카오톡 "나와의 채팅"을 확인하세요.');
+}
+
+// 2) 시험 알림 보내기
+function kakaoTest() {
+  카카오보내기_('🔔 시험 알림입니다. 상담 신청이 들어오면 이렇게 알려드립니다.', SpreadsheetApp.getActiveSpreadsheet().getUrl());
+  console.log('보냈습니다. 카카오톡 "나와의 채팅"을 확인하세요.');
+}
+
+// 3) 매주 자동 실행 (직접 실행할 필요 없음)
+function kakaoRefresh() {
+  if (카카오연결됨_()) 카카오토큰_(true);
+}
+
+// 카카오톡 알림을 끄고 싶을 때 실행
+function kakaoDisconnect() {
+  const p = PropertiesService.getScriptProperties();
+  ['KAKAO_ACCESS', 'KAKAO_REFRESH', 'KAKAO_ACCESS_EXP'].forEach((k) => p.deleteProperty(k));
+  ScriptApp.getProjectTriggers()
+    .filter((t) => t.getHandlerFunction() === 'kakaoRefresh')
+    .forEach((t) => ScriptApp.deleteTrigger(t));
+  console.log('카카오톡 알림 연결을 해제했습니다.');
+}
+
+function 카카오연결됨_() {
+  return !!PropertiesService.getScriptProperties().getProperty('KAKAO_REFRESH');
+}
+
+function 카카오토큰_(강제갱신) {
+  const p = PropertiesService.getScriptProperties();
+  const access = p.getProperty('KAKAO_ACCESS');
+  const exp = Number(p.getProperty('KAKAO_ACCESS_EXP') || 0);
+  if (!강제갱신 && access && Date.now() < exp) return access;
+
+  const payload = {
+    grant_type: 'refresh_token',
+    client_id: p.getProperty('KAKAO_REST_KEY'),
+    refresh_token: p.getProperty('KAKAO_REFRESH'),
+  };
+  const secret = p.getProperty('KAKAO_CLIENT_SECRET');
+  if (secret) payload.client_secret = secret;
+  const j = 카카오요청_('https://kauth.kakao.com/oauth/token', payload);
+  if (!j.access_token) throw new Error('카카오 토큰 갱신 실패: ' + JSON.stringify(j));
+
+  const 새값 = {
+    KAKAO_ACCESS: j.access_token,
+    KAKAO_ACCESS_EXP: String(Date.now() + (Number(j.expires_in) - 300) * 1000),
+  };
+  if (j.refresh_token) 새값.KAKAO_REFRESH = j.refresh_token; // 만료가 가까우면 새 값이 옴
+  p.setProperties(새값);
+  return j.access_token;
+}
+
+function 카카오보내기_(글, 링크) {
+  const token = 카카오토큰_(false);
+  const template = {
+    object_type: 'text',
+    text: String(글).slice(0, 200),
+    link: { web_url: 링크 || '', mobile_web_url: 링크 || '' },
+    button_title: '시트 열기',
+  };
+  const j = 카카오요청_('https://kapi.kakao.com/v2/api/talk/memo/default/send',
+    { template_object: JSON.stringify(template) }, token);
+  if (j.result_code !== 0) throw new Error('카카오톡 전송 실패: ' + JSON.stringify(j));
+}
+
+function 카카오요청_(url, payload, token) {
+  const opt = { method: 'post', payload: payload, muteHttpExceptions: true };
+  if (token) opt.headers = { Authorization: 'Bearer ' + token };
+  const res = UrlFetchApp.fetch(url, opt);
+  try { return JSON.parse(res.getContentText()); }
+  catch (e) { return { error: res.getResponseCode(), body: res.getContentText().slice(0, 300) }; }
 }
 
 /* ---------- 처음 한 번 실행: 탭과 예시 내용 만들기 ---------- */
