@@ -72,6 +72,13 @@
   .mass .meta { color: var(--muted); font-size: 14px; }
   .change { background: #fff8e6; border: 1px solid #ecd9a6; border-left: 4px solid var(--gold); border-radius: 12px; padding: 14px 16px; margin-bottom: 10px; font-size: 14px; color: #5a4a22; }
   .change b { display: block; font-size: 16px; color: var(--ink); margin-bottom: 2px; }
+  .gospel { margin-top: 14px; padding: 18px 20px; border-left: 4px solid var(--gold); }
+  .gospel .g-head { display: flex; justify-content: space-between; gap: 10px; align-items: baseline; font-size: 13px; color: var(--muted); letter-spacing: .02em; }
+  .gospel .g-head #gLabel { font-weight: 700; color: var(--gold); }
+  .gospel blockquote { margin: 10px 0 8px; font-family: var(--serif); font-size: 18px; line-height: 1.6; color: var(--ink); }
+  .gospel blockquote::before { content: "“"; }
+  .gospel blockquote::after { content: "”"; }
+  .gospel p { margin: 0; color: #36403a; font-size: 15px; white-space: pre-line; }
   .next .tag { display: inline-block; margin-left: 6px; background: var(--gold); color: #fff; font-size: 11px; font-weight: 700; padding: 1px 8px; border-radius: 999px; letter-spacing: 0; vertical-align: 1px; }
 
   /* 공지사항 */
@@ -169,6 +176,12 @@
           <div class="where" id="nextWhere"></div>
         </div>
         <a class="btn ghost" href="#mass" style="background:#fff">전체 시간표</a>
+      </div>
+
+      <div class="card gospel" id="gospel" hidden>
+        <div class="g-head"><span id="gLabel">미사 복음</span><span class="g-ref" id="gRef"></span></div>
+        <blockquote id="gVerse"></blockquote>
+        <p id="gSummary"></p>
       </div>
 
       <div class="quick">
@@ -321,6 +334,10 @@ const SAMPLE = {
   // 미리보기용 예시: 다음 주 금요일로 변경 (실제로는 구글 시트 '미사변경' 탭에서 관리)
   changes: [
     { '날짜': (() => { const d = new Date(); d.setDate(d.getDate() + ((5 - d.getDay() + 7) % 7) + 7); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; })(), '시간': '', '장소': '', '안내': '', '이름': '' }
+  ],
+  // 미사 복음 (실제로는 구글 시트 '복음' 탭에서 관리)
+  gospel: [
+    { '날짜': '2026-11-06', '복음': '루카 16,1-8', '핵심구절': '', '요약': '재산을 낭비했다는 고발을 받은 집사가 해고를 앞두고, 주인에게 빚진 이들의 빚을 덜어 주며 앞날을 대비합니다.\n예수님은 세상 사람들의 이런 영리함을 들어, 신앙인인 우리도 하느님 나라를 위해 지혜롭게 준비하라고 하십니다.' }
   ]
 };
 
@@ -448,6 +465,23 @@ function render(data) {
       <div><div class="name">${esc(r['이름'])}</div>
         <div class="meta">${esc([r['장소'], r['비고']].filter(Boolean).join(' · '))}</div></div>
     </div>`).join('') : '<div class="card empty">등록된 미사 시간이 없습니다.</div>';
+
+  // 미사 복음: 오늘 이후 가장 가까운 날짜 한 개
+  const todayKey = startOfDay(new Date()).getTime();
+  const g = (data.gospel || [])
+    .map((r) => ({ r, d: parseDate(r['날짜']) }))
+    .filter((x) => x.d && x.d.getTime() >= todayKey && (x.r['요약'] || x.r['핵심구절']))
+    .sort((a, b) => a.d - b.d)[0];
+  if (g) {
+    $('#gLabel').textContent = g.d.getTime() === todayKey ? '오늘 미사 복음' : `${dateLabel(g.d)} 미사 복음`;
+    $('#gRef').textContent = g.r['복음'] || '';
+    $('#gVerse').textContent = g.r['핵심구절'] || '';
+    $('#gVerse').hidden = !g.r['핵심구절'];
+    $('#gSummary').textContent = g.r['요약'] || '';
+    $('#gospel').hidden = false;
+  } else {
+    $('#gospel').hidden = true;
+  }
 
   // 요일 변경 안내
   const changes = normChanges(data.changes, masses);

@@ -16,6 +16,7 @@ const 탭 = {
   정보: '기본정보',
   미사: '미사시간',
   변경: '미사변경',
+  복음: '복음',
   공지: '공지사항',
   상담: '상담신청',
 };
@@ -29,6 +30,7 @@ function doGet() {
     info: 키값읽기_(ss.getSheetByName(탭.정보)),
     masses: 표읽기_(ss.getSheetByName(탭.미사)),
     changes: 표읽기_(ss.getSheetByName(탭.변경)),
+    gospel: 표읽기_(ss.getSheetByName(탭.복음)),
     notices: 표읽기_(ss.getSheetByName(탭.공지)),
     updated: new Date().toISOString(),
   });
@@ -128,6 +130,33 @@ function setup() {
     );
     ch.setColumnWidths(1, 5, 140);
     ch.setColumnWidth(4, 320);
+  }
+
+  // 미사 날마다 복음 핵심 구절과 요약을 적는 탭
+  if (!ss.getSheetByName(탭.복음)) {
+    탭만들기_(ss, 탭.복음, [['날짜', '복음', '핵심구절', '요약']]);
+    const gs = ss.getSheetByName(탭.복음);
+    gs.getRange('A2:A').setNumberFormat('yyyy-mm-dd')
+      .setDataValidation(SpreadsheetApp.newDataValidation().requireDate().setAllowInvalid(false)
+        .setHelpText('미사 날짜를 입력하세요. 예: 2026-11-12').build());
+    gs.getRange('A1').setNote(
+      '미사가 있는 날마다 한 줄씩 적으세요.\n' +
+      '· 홈페이지 첫 화면에 오늘 이후 가장 가까운 날짜의 복음이 나옵니다.\n' +
+      '· 복음: 성경 출처 (예: 루카 16,1-8)\n' +
+      '· 핵심구절: 매일미사 본문에서 한두 문장\n' +
+      '· 요약: 두 줄 정도 (칸 안 줄바꿈은 Ctrl+Enter)\n' +
+      '· 지난 날짜는 자동으로 표시되지 않습니다.'
+    );
+    gs.appendRow([
+      new Date(2026, 10, 6), '루카 16,1-8', '',
+      '재산을 낭비했다는 고발을 받은 집사가 해고를 앞두고, 주인에게 빚진 이들의 빚을 덜어 주며 앞날을 대비합니다.\n' +
+      '예수님은 세상 사람들의 이런 영리함을 들어, 신앙인인 우리도 하느님 나라를 위해 지혜롭게 준비하라고 하십니다.',
+    ]);
+    gs.setColumnWidth(1, 110);
+    gs.setColumnWidth(2, 120);
+    gs.setColumnWidth(3, 320);
+    gs.setColumnWidth(4, 420);
+    gs.getRange('C:D').setWrap(true);
   }
   상담탭_(ss);
 
