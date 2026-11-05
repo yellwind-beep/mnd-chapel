@@ -8,6 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@500;700&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
 <style>
   :root {
     --bg: #f6f3ec;
@@ -36,7 +37,7 @@
   /* 상단 메뉴 */
   header.top { position: sticky; top: 0; z-index: 10; background: rgba(246,243,236,.92); backdrop-filter: blur(8px); }
   header.top .wrap { display: flex; align-items: center; justify-content: space-between; height: 60px; gap: 12px; }
-  .brand { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--ink); font-family: var(--serif); font-weight: 700; font-size: 17px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .brand { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--ink); font-family: "Pretendard Variable", Pretendard, var(--sans); font-weight: 700; font-size: 17px; letter-spacing: -0.02em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .brand svg { flex: none; }
   nav.menu { display: flex; gap: 4px; }
   nav.menu a { text-decoration: none; color: var(--muted); font-size: 14px; padding: 6px 10px; border-radius: 8px; white-space: nowrap; }
@@ -56,7 +57,7 @@
 
   /* 섹션 공통 */
   section.block { padding: 14px 0; }
-  .block h2 { font-family: var(--serif); font-size: 24px; margin: 0 0 4px; }
+  .block h2 { font-family: var(--sans); font-size: 20px; font-weight: 700; letter-spacing: -0.01em; margin: 0 0 4px; }
   .block .sub { color: var(--muted); margin: 0 0 18px; font-size: 14px; }
   .block h2 + #pinList, .block h2 + .way { margin-top: 14px; }
   .way { padding: 16px 18px; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
@@ -158,7 +159,7 @@
     .hero { padding-top: 4px; }
     .hero p.lead { font-size: 16px; }
     .next .when { font-size: clamp(19px, 5.6vw, 22px); line-height: 1.35; }
-    .block h2 { font-size: 22px; }
+    .block h2 { font-size: 19px; }
     .gospel { padding: 16px 16px 16px 18px; }
     .gospel .g-head { flex-wrap: wrap; row-gap: 2px; }
     form.consult { padding: 18px 16px; }
