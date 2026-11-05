@@ -59,6 +59,14 @@
   .block h2 { font-family: var(--serif); font-size: 24px; margin: 0 0 4px; }
   .block .sub { color: var(--muted); margin: 0 0 18px; font-size: 14px; }
   .block h2 + #pinList, .block h2 + .way { margin-top: 14px; }
+  .way { padding: 16px 18px; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  .way .addr { flex: 1 1 auto; min-width: 0; white-space: nowrap; }
+  .way #mapWrap { flex: none; }
+  .way #mapLink { white-space: nowrap; }
+  @media (max-width: 480px) {
+    .way { padding: 14px 14px; gap: 10px; }
+    .way #mapLink { padding: 7px 10px; font-size: 13.5px; }
+  }
   .card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); }
 
   /* 미사 시간 */
@@ -91,10 +99,6 @@
   .more { margin-top: 12px; background: none; border: 1px solid var(--line); border-radius: 10px; padding: 10px; width: 100%; font: inherit; color: var(--muted); cursor: pointer; }
 
   /* 오시는 길 */
-  .way { padding: 20px 22px; display: grid; gap: 16px; }
-  .way dl { margin: 0; display: grid; grid-template-columns: 88px 1fr; gap: 10px 14px; }
-  .way dt { color: var(--muted); font-size: 14px; }
-  .way dd { margin: 0; white-space: pre-line; }
   .btn { display: inline-block; background: var(--accent); color: #fff; text-decoration: none; padding: 10px 16px; border-radius: 10px; font-weight: 500; font-size: 15px; border: 0; cursor: pointer; font-family: inherit; }
   .btn.ghost { background: var(--surface); color: var(--accent); border: 1px solid var(--accent); }
 
@@ -159,8 +163,6 @@
     .block h2 { font-size: 22px; }
     .gospel { padding: 16px 16px 16px 18px; }
     .gospel .g-head { flex-wrap: wrap; row-gap: 2px; }
-    .way dl { grid-template-columns: 1fr; gap: 2px; }
-    .way dd { margin-bottom: 12px; }
     form.consult { padding: 18px 16px; }
     details.notice summary { padding: 14px 16px; }
   }
@@ -212,9 +214,7 @@
     <section class="block" id="way">
       <h2>오시는 길</h2>
       <div class="card way">
-        <dl>
-          <dt>위치</dt><dd data-info="주소">-</dd>
-        </dl>
+        <div class="addr" data-info="주소">-</div>
         <div id="mapWrap" hidden><a class="btn ghost" id="mapLink" target="_blank" rel="noopener">지도에서 보기</a></div>
       </div>
     </section>
@@ -449,6 +449,7 @@ function render(data) {
   });
   if (info['성당이름']) document.title = info['성당이름'];
   if (info['지도링크']) { $('#mapLink').href = info['지도링크']; $('#mapWrap').hidden = false; }
+  fitAddr();
 
   // 미사 시간
   const masses = (data.masses || []).slice().sort((a, b) => {
@@ -578,6 +579,21 @@ $('#consultForm').addEventListener('submit', async (ev) => {
     btn.disabled = false; btn.textContent = '상담 신청하기';
   }
 });
+
+/* 오시는 길 주소와 지도 버튼이 한 줄에 들어가도록 글자 크기 자동 조절 */
+function fitAddr() {
+  const el = $('.way .addr'), btn = $('#mapLink');
+  if (!el) return;
+  el.style.fontSize = ''; btn.style.fontSize = ''; btn.style.padding = '';
+  let size = parseFloat(getComputedStyle(el).fontSize);
+  let bsize = parseFloat(getComputedStyle(btn).fontSize);
+  while (el.scrollWidth > el.clientWidth && (size > 11 || bsize > 11)) {
+    if (size > 11) { size -= 0.5; el.style.fontSize = size + 'px'; }
+    if (bsize > 11) { bsize -= 0.5; btn.style.fontSize = bsize + 'px'; btn.style.padding = '6px 8px'; }
+  }
+}
+window.addEventListener('resize', fitAddr);
+if (document.fonts) document.fonts.ready.then(fitAddr);
 
 load();
 </script>
