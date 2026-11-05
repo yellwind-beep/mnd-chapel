@@ -196,11 +196,14 @@
     .open-row .btn { padding: 8px 14px; font-size: 14px; }
   }
 
-  /* 휴대폰: 남는 세로 공간을 칸 사이에 고르게 나눠 화면을 꽉 채움 (아래 빈 공간 없음) */
+  /* 휴대폰: 남는 세로 공간을 칸 사이(최대 14px씩)에 먼저 나누고, 나머지는 위·아래 여백으로 (아래만 비는 일 없음) */
+  .sp { display: none; }
   @media (max-width: 480px) {
     body { display: flex; flex-direction: column; min-height: 100vh; min-height: 100dvh; }
     main { flex: 1 0 auto; display: flex; flex-direction: column; }
-    main > .wrap { flex: 1 0 auto; display: flex; flex-direction: column; justify-content: space-between; margin: 0; }
+    main > .wrap { flex: 1 0 auto; display: flex; flex-direction: column; margin: 0; }
+    main > .wrap::before, main > .wrap::after { content: ""; flex: 1 1 0; }
+    main > .wrap > .sp { display: block; flex: 1 1 0; max-height: 14px; }
   }
   /* 휴대폰 화면 높이별 단계: 작은 폰(기본·위) → 보통 폰 → 큰 폰 순으로 글자·간격을 넉넉하게 */
   @media (max-width: 480px) and (min-height: 640px) {
@@ -288,6 +291,7 @@
       </div>
     </section>
 
+    <div class="sp" aria-hidden="true"></div>
     <section class="block" id="notice">
       <h2>공지사항</h2>
       <div id="pinList"></div>
@@ -295,6 +299,7 @@
       <button class="more" id="moreBtn" hidden>이전 공지 더 보기</button>
     </section>
 
+    <div class="sp" aria-hidden="true"></div>
     <section class="block" id="way">
       <h2>오시는 길</h2>
       <div class="card way">
@@ -303,6 +308,7 @@
       </div>
     </section>
 
+    <div class="sp" aria-hidden="true"></div>
     <section class="block" id="consult">
       <div class="consult-head">
         <h2>상담 신청</h2>
