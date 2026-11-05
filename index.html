@@ -44,7 +44,8 @@
   @media (max-width: 640px) { nav.menu { display: none; } }
 
   /* 첫 화면 */
-  .hero { padding: 48px 0 28px; }
+  .hero { padding: 24px 0 28px; }
+  .sr-only { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
   .hero h1 { font-family: var(--serif); font-size: clamp(28px, 6vw, 40px); line-height: 1.3; margin: 0 0 10px; letter-spacing: -0.01em; }
   .hero p.lead { color: var(--muted); margin: 0 0 24px; font-size: 17px; }
   .next { background: var(--accent); color: #fff; border-radius: var(--radius); padding: 20px 22px; display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; box-shadow: var(--shadow); }
@@ -161,7 +162,7 @@
 
   @media (max-width: 480px) {
     body { font-size: 15.5px; }
-    .hero { padding-top: 32px; }
+    .hero { padding-top: 18px; }
     .hero p.lead { font-size: 16px; }
     .next .when { font-size: clamp(19px, 5.6vw, 22px); line-height: 1.35; }
     .block h2 { font-size: 22px; }
@@ -197,8 +198,7 @@
 <main>
   <div class="wrap">
     <section class="hero">
-      <h1 data-info="성당이름">국방부 직원 성당</h1>
-      <p class="lead" data-info="소개">언제든 편하게 찾아오세요.</p>
+      <h1 class="sr-only" data-info="성당이름">국방부 직원 성당</h1>
 
       <div class="next" id="nextMass">
         <div>
