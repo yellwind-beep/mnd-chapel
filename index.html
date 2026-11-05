@@ -58,6 +58,7 @@
   section.block { padding: 36px 0; }
   .block h2 { font-family: var(--serif); font-size: 24px; margin: 0 0 4px; }
   .block .sub { color: var(--muted); margin: 0 0 18px; font-size: 14px; }
+  .block h2 + .notices { margin-top: 14px; }
   .card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); }
 
   /* 미사 시간 */
@@ -215,7 +216,6 @@
 
     <section class="block" id="notice">
       <h2>공지사항</h2>
-      <p class="sub">제목을 누르면 내용이 펼쳐집니다.</p>
       <div class="notices" id="noticeList"><div class="skel"></div><div class="skel"></div><div class="skel"></div></div>
       <button class="more" id="moreBtn" hidden>이전 공지 더 보기</button>
     </section>
