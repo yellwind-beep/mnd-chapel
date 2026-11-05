@@ -474,13 +474,11 @@ function render(data) {
     $('#gospel').hidden = true;
   }
 
-  const today = startOfDay(new Date());
   const all = upcoming(masses, changes);
   const massOnly = all.filter((x) => /미사/.test(x.name));
   const nx = (massOnly.length ? massOnly : all)[0];
   if (nx) {
-    const diff = Math.round((startOfDay(nx.dt) - today) / 86400000);
-    const rel = diff === 0 ? '오늘' : diff === 1 ? '내일' : dateLabel(nx.dt);
+    const rel = dateLabel(nx.dt);
     $('#nextLabel').innerHTML = nx.changed ? '다음 미사 <span class="tag">요일 변경</span>' : '다음 미사';
     $('#nextWhen').textContent = `${rel} ${pad2(nx.dt.getHours())}:${pad2(nx.dt.getMinutes())}`;
     $('#nextWhere').textContent = nx.place;
