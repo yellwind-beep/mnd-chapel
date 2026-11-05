@@ -196,6 +196,12 @@
     .open-row .btn { padding: 8px 14px; font-size: 14px; }
   }
 
+  /* 휴대폰: 남는 세로 공간을 칸 사이에 고르게 나눠 화면을 꽉 채움 (아래 빈 공간 없음) */
+  @media (max-width: 480px) {
+    body { display: flex; flex-direction: column; min-height: 100vh; min-height: 100dvh; }
+    main { flex: 1 0 auto; display: flex; flex-direction: column; }
+    main > .wrap { flex: 1 0 auto; display: flex; flex-direction: column; justify-content: space-between; margin: 0; }
+  }
   /* 휴대폰 화면 높이별 단계: 작은 폰(기본·위) → 보통 폰 → 큰 폰 순으로 글자·간격을 넉넉하게 */
   @media (max-width: 480px) and (min-height: 640px) {
     body { font-size: 15.5px; }
