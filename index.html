@@ -168,6 +168,33 @@
     form.consult { padding: 18px 16px; }
     details.notice summary { padding: 14px 16px; }
   }
+
+  /* 휴대폰: 한 화면에 다 보이도록 글자·간격 줄이기 */
+  @media (max-width: 480px) {
+    body { font-size: 15px; }
+    header.top .wrap { height: 48px; }
+    .brand { font-size: 18px; }
+    .brand svg { width: 24px; height: 24px; }
+    .hero { padding: 2px 0 8px; }
+    .next { padding: 13px 16px; }
+    .next .label { font-size: 12px; }
+    .next .when { font-size: clamp(17px, 5vw, 19px); margin-top: 0; }
+    .next .where { font-size: 13.5px; }
+    .gospel { margin-top: 8px; padding: 11px 14px 12px 15px; }
+    .gospel .g-head { font-size: 12px; }
+    .gospel blockquote { margin-top: 4px; font-size: clamp(15px, 4.1vw, 16.5px); line-height: 1.5; }
+    section.block { padding: 8px 0; }
+    .block h2 { font-size: 17px; }
+    .block h2 + #pinList, .block h2 + .way, #consultBox { margin-top: 8px; }
+    .notices { gap: 7px; }
+    details.notice.pinned { margin-bottom: 7px; }
+    details.notice summary { padding: 10px 14px; }
+    details.notice .thumb { width: 40px; height: 26px; }
+    .way { padding: 9px 12px 9px 14px; }
+    .way #mapLink { padding: 6px 10px; }
+    .open-row .btn { padding: 8px 14px; font-size: 14px; }
+    footer { padding: 12px 0 20px; margin-top: 8px; font-size: 12px; }
+  }
 </style>
 </head>
 <body>
