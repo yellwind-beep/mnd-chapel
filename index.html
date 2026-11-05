@@ -58,16 +58,10 @@
   section.block { padding: 36px 0; }
   .block h2 { font-family: var(--serif); font-size: 24px; margin: 0 0 4px; }
   .block .sub { color: var(--muted); margin: 0 0 18px; font-size: 14px; }
-  .block h2 + .notices, .block h2 + .way { margin-top: 14px; }
+  .block h2 + #pinList, .block h2 + .way { margin-top: 14px; }
   .card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); }
 
   /* 미사 시간 */
-  .mass-list { display: grid; gap: 10px; }
-  .mass { display: grid; grid-template-columns: 92px 1fr; gap: 14px; padding: 16px 18px; align-items: center; }
-  .mass .day { font-weight: 700; color: var(--accent); }
-  .mass .time { font-family: var(--serif); font-size: 22px; font-weight: 700; line-height: 1.1; }
-  .mass .name { font-weight: 500; }
-  .mass .meta { color: var(--muted); font-size: 14px; }
   .change { background: #fff8e6; border: 1px solid #ecd9a6; border-left: 4px solid var(--gold); border-radius: 12px; padding: 14px 16px; margin-bottom: 10px; font-size: 14px; color: #5a4a22; }
   .change b { display: block; font-size: 16px; color: var(--ink); margin-bottom: 2px; }
   .gospel { margin-top: 14px; padding: 18px 20px; border-left: 4px solid var(--gold); }
@@ -153,7 +147,7 @@
   body { word-break: keep-all; overflow-wrap: break-word; }
   a, .g-ref, .d { overflow-wrap: anywhere; }
   h1, h2, h3, .next .when, .gospel blockquote, .change b { text-wrap: balance; }
-  p, dd, blockquote, .sub, .lead, .body, .change, .help, .privacy, .mass .meta, .done p { text-wrap: pretty; }
+  p, dd, blockquote, .sub, .lead, .body, .change, .help, .privacy, .done p { text-wrap: pretty; }
 
   /* 줄 간격: 화면이 좁을수록 조금 넓게, 큰 글씨는 조금 좁게 */
   body { line-height: clamp(1.6, 1.5 + 0.4vw, 1.75); }
@@ -169,7 +163,6 @@
     .block h2 { font-size: 22px; }
     .gospel { padding: 16px 16px 16px 18px; }
     .gospel .g-head { flex-wrap: wrap; row-gap: 2px; }
-    .mass { grid-template-columns: 76px 1fr; gap: 12px; padding: 14px 16px; }
     .way dl { grid-template-columns: 1fr; gap: 2px; }
     .way dd { margin-bottom: 12px; }
     form.consult { padding: 18px 16px; }
@@ -189,7 +182,6 @@
     </a>
     <nav class="menu" aria-label="주 메뉴">
       <a href="#notice">공지사항</a>
-      <a href="#mass">미사 시간</a>
       <a href="#way">오시는 길</a>
       <a href="#consult">상담 신청</a>
     </nav>
@@ -216,16 +208,10 @@
 
     <section class="block" id="notice">
       <h2>공지사항</h2>
-      <div class="notices" id="noticeList"><div class="skel"></div><div class="skel"></div><div class="skel"></div></div>
-      <button class="more" id="moreBtn" hidden>이전 공지 더 보기</button>
-    </section>
-
-    <section class="block" id="mass">
-      <h2>미사 · 성사 시간</h2>
-      <p class="sub">일정에 따라 바뀔 수 있으니 공지사항도 함께 확인해 주세요.</p>
       <div id="pinList"></div>
       <div id="changeList"></div>
-      <div class="mass-list" id="massList"><div class="skel"></div><div class="skel"></div></div>
+      <div class="notices" id="noticeList"><div class="skel"></div><div class="skel"></div><div class="skel"></div></div>
+      <button class="more" id="moreBtn" hidden>이전 공지 더 보기</button>
     </section>
 
     <section class="block" id="way">
@@ -481,29 +467,7 @@ function render(data) {
     const ta = parseTime(a['시간']), tb = parseTime(b['시간']);
     return (ta ? ta.h * 60 + ta.m : 0) - (tb ? tb.h * 60 + tb.m : 0);
   });
-  // 이번 주(또는 다음 차례 평소 미사가 있는 주)에 아직 지나지 않은 '미사변경'이 있으면
-  // 평소 미사 카드는 숨기고 위의 변경 안내만 보여줌
   const changes = normChanges(data.changes, masses);
-  const nextReplaced = (r) => {
-    const tm = parseTime(r['시간']), days = parseDays(r['요일']), now = new Date();
-    if (!tm || !days.length) return false;
-    const weeks = [weekKey(now)];
-    for (let i = 0; i < 8; i++) {
-      const day = startOfDay(now); day.setDate(day.getDate() + i);
-      if (!days.includes(day.getDay())) continue;
-      const dt = new Date(day); dt.setHours(tm.h, tm.m, 0, 0);
-      if (dt > now) { weeks.push(weekKey(day)); break; }
-    }
-    const today0 = startOfDay(now);
-    return changes.some((c) => c.date >= today0 && weeks.includes(c.week) && (c.specific ? c.name === r['이름'] : isMassRow(r)));
-  };
-  const shownMasses = masses.filter((r) => !nextReplaced(r));
-  $('#massList').innerHTML = !masses.length ? '<div class="card empty">등록된 미사 시간이 없습니다.</div>' : shownMasses.map((r) => `
-    <div class="card mass">
-      <div><div class="day">${esc(dayLabel(r['요일']))}</div><div class="time">${esc(r['시간'])}</div></div>
-      <div><div class="name">${esc(r['이름'])}</div>
-        <div class="meta">${esc([r['장소'], r['비고']].filter(Boolean).join(' · '))}</div></div>
-    </div>`).join('');
 
   // 미사 복음: 오늘 이후 가장 가까운 날짜 한 개
   const todayKey = startOfDay(new Date()).getTime();
@@ -585,9 +549,8 @@ async function load() {
     render(data);
     try { localStorage.setItem(CACHE_KEY, JSON.stringify(data)); } catch (e) {}
   } catch (e) {
-    if (!$('#massList .mass')) {
-      $('#massList').innerHTML = '<div class="card empty">내용을 불러오지 못했습니다. 잠시 후 다시 열어주세요.</div>';
-      $('#noticeList').innerHTML = '';
+    if ($('#noticeList .skel')) {
+      $('#noticeList').innerHTML = '<div class="card empty">내용을 불러오지 못했습니다. 잠시 후 다시 열어주세요.</div>';
       $('#nextWhen').textContent = '불러오기 실패';
     }
   }
