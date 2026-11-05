@@ -58,7 +58,7 @@
   section.block { padding: 36px 0; }
   .block h2 { font-family: var(--serif); font-size: 24px; margin: 0 0 4px; }
   .block .sub { color: var(--muted); margin: 0 0 18px; font-size: 14px; }
-  .block h2 + .notices { margin-top: 14px; }
+  .block h2 + .notices, .block h2 + .way { margin-top: 14px; }
   .card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); }
 
   /* 미사 시간 */
@@ -230,13 +230,9 @@
 
     <section class="block" id="way">
       <h2>오시는 길</h2>
-      <p class="sub">처음 오시는 분도 쉽게 찾을 수 있도록 안내해 드립니다.</p>
       <div class="card way">
         <dl>
           <dt>위치</dt><dd data-info="주소">-</dd>
-          <dt>찾아오기</dt><dd data-info="오시는길">-</dd>
-          <dt>연락처</dt><dd data-info="연락처">-</dd>
-          <dt>면담 시간</dt><dd data-info="사무실시간">-</dd>
         </dl>
         <div id="mapWrap" hidden><a class="btn ghost" id="mapLink" target="_blank" rel="noopener">지도에서 보기</a></div>
       </div>
