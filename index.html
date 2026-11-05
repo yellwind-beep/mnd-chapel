@@ -57,6 +57,7 @@
 
   /* 섹션 공통 */
   section.block { padding: 14px 0; }
+  main { padding-bottom: 28px; }
   .block h2 { font-family: var(--sans); font-size: 20px; font-weight: 700; letter-spacing: -0.01em; margin: 0 0 4px; }
   .block .sub { color: var(--muted); margin: 0 0 18px; font-size: 14px; }
   .block h2 + #pinList, .block h2 + .way { margin-top: 14px; }
@@ -140,7 +141,6 @@
   .skel { height: 64px; border-radius: var(--radius); background: linear-gradient(90deg, #ece8df 0%, #f4f1ea 50%, #ece8df 100%); background-size: 200% 100%; animation: sh 1.2s infinite; }
   @keyframes sh { to { background-position: -200% 0; } }
 
-  footer { border-top: 1px solid var(--line); padding: 28px 0 40px; color: var(--muted); font-size: 13px; margin-top: 20px; }
 
   /* ---------- 화면 폭에 맞춘 줄바꿈 · 줄 간격 ----------
    * keep-all: 한글을 글자 중간이 아니라 띄어쓰기에서 줄바꿈
@@ -175,7 +175,7 @@
     header.top .wrap { height: 48px; }
     .brand { font-size: 18px; }
     .brand svg { width: 24px; height: 24px; }
-    .hero { padding: 2px 0 8px; }
+    .hero { padding: 2px 0 6px; }
     .next { padding: 13px 16px; }
     .next .label { font-size: 12px; }
     .next .when { font-size: clamp(17px, 5vw, 19px); margin-top: 0; }
@@ -183,7 +183,8 @@
     .gospel { margin-top: 8px; padding: 11px 14px 12px 15px; }
     .gospel .g-head { font-size: 12px; }
     .gospel blockquote { margin-top: 4px; font-size: clamp(15px, 4.1vw, 16.5px); line-height: 1.5; }
-    section.block { padding: 8px 0; }
+    section.block { padding: 7px 0; }
+    main { padding-bottom: 8px; }
     .block h2 { font-size: 17px; }
     .block h2 + #pinList, .block h2 + .way, #consultBox { margin-top: 8px; }
     .notices { gap: 7px; }
@@ -193,7 +194,6 @@
     .way { padding: 9px 12px 9px 14px; }
     .way #mapLink { padding: 6px 10px; }
     .open-row .btn { padding: 8px 14px; font-size: 14px; }
-    footer { padding: 12px 0 20px; margin-top: 8px; font-size: 12px; }
   }
 </style>
 </head>
@@ -327,12 +327,6 @@
   </div>
 </main>
 
-<footer>
-  <div class="wrap">
-    <div data-info="성당이름">국방부 직원 성당</div>
-    <div id="updated"></div>
-  </div>
-</footer>
 
 <script>
 /* =========================================================
@@ -546,11 +540,6 @@ function render(data) {
   $('#moreBtn').onclick = () => { shown += NOTICE_PAGE; drawNotices(); fitTitles(); };
   drawNotices();
   fitTitles();
-
-  if (data.updated) {
-    const d = new Date(data.updated);
-    if (!isNaN(d)) $('#updated').textContent = `최근 확인: ${d.toLocaleString('ko-KR', { dateStyle: 'medium', timeStyle: 'short' })}`;
-  }
 }
 
 async function load() {
