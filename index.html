@@ -195,6 +195,55 @@
     .way #mapLink { padding: 6px 10px; }
     .open-row .btn { padding: 8px 14px; font-size: 14px; }
   }
+
+  /* 휴대폰 화면 높이별 단계: 작은 폰(기본·위) → 보통 폰 → 큰 폰 순으로 글자·간격을 넉넉하게 */
+  @media (max-width: 480px) and (min-height: 640px) {
+    body { font-size: 15.5px; }
+    header.top .wrap { height: 52px; }
+    .brand { font-size: 19px; }
+    .brand svg { width: 26px; height: 26px; }
+    .hero { padding: 4px 0 8px; }
+    .next { padding: 15px 18px; }
+    .next .when { font-size: clamp(18px, 5.2vw, 20.5px); }
+    .next .where { font-size: 14px; }
+    .gospel { margin-top: 10px; padding: 13px 16px 14px 17px; }
+    .gospel blockquote { margin-top: 6px; font-size: clamp(15.5px, 4.3vw, 17.5px); }
+    section.block { padding: 9px 0; }
+    .block h2 { font-size: 18px; }
+    .block h2 + #pinList, .block h2 + .way, #consultBox { margin-top: 10px; }
+    .notices { gap: 8px; }
+    details.notice.pinned { margin-bottom: 8px; }
+    details.notice summary { padding: 12px 16px; }
+    details.notice .thumb { width: 44px; height: 28px; }
+    .way { padding: 11px 14px 11px 16px; }
+    .way #mapLink { padding: 7px 11px; }
+    .open-row .btn { padding: 9px 16px; font-size: 14.5px; }
+  }
+  @media (max-width: 480px) and (min-height: 740px) {
+    body { font-size: 16px; }
+    header.top .wrap { height: 56px; }
+    .brand { font-size: 20px; }
+    .brand svg { width: 28px; height: 28px; }
+    .hero { padding: 6px 0 10px; }
+    .next { padding: 18px 20px; }
+    .next .label { font-size: 13px; }
+    .next .when { font-size: clamp(19px, 5.4vw, 22px); margin-top: 2px; }
+    .next .where { font-size: 15px; }
+    .gospel { margin-top: 12px; padding: 16px 18px 17px 19px; }
+    .gospel .g-head { font-size: 13px; }
+    .gospel blockquote { margin-top: 8px; font-size: clamp(16px, 4.4vw, 18.5px); line-height: 1.55; }
+    section.block { padding: 12px 0; }
+    main { padding-bottom: 16px; }
+    .block h2 { font-size: 19px; }
+    .block h2 + #pinList, .block h2 + .way, #consultBox { margin-top: 12px; }
+    .notices { gap: 10px; }
+    details.notice.pinned { margin-bottom: 10px; }
+    details.notice summary { padding: 14px 18px; }
+    details.notice .thumb { width: 48px; height: 32px; }
+    .way { padding: 13px 16px 13px 18px; }
+    .way #mapLink { padding: 8px 12px; font-size: 14px; }
+    .open-row .btn { padding: 10px 18px; font-size: 15px; }
+  }
 </style>
 </head>
 <body>
