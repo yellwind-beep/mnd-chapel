@@ -50,7 +50,8 @@
   .next { background: var(--accent); color: #fff; border-radius: var(--radius); padding: 20px 22px; display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; box-shadow: var(--shadow); }
   .next .label { font-size: 13px; opacity: .8; letter-spacing: .04em; }
   .next .when { font-family: var(--serif); font-size: 22px; font-weight: 700; margin-top: 2px; }
-  .next .where { font-size: 14px; opacity: .85; }
+  .next .where { font-family: var(--sans); font-size: 15px; font-weight: 500; opacity: .85; margin-left: 10px; white-space: nowrap; }
+  .next .where:empty { display: none; }
 
   /* 섹션 공통 */
   section.block { padding: 36px 0; }
@@ -202,10 +203,8 @@
       <div class="next" id="nextMass">
         <div>
           <div class="label" id="nextLabel">다음 미사</div>
-          <div class="when" id="nextWhen">불러오는 중…</div>
-          <div class="where" id="nextWhere"></div>
+          <div class="when"><span id="nextWhen">불러오는 중…</span><span class="where" id="nextWhere"></span></div>
         </div>
-        <a class="btn ghost" href="#mass" style="background:#fff">전체 시간표</a>
       </div>
 
       <div class="card gospel" id="gospel" hidden>
@@ -542,7 +541,7 @@ function render(data) {
     const diff = Math.round((startOfDay(nx.dt) - today) / 86400000);
     const rel = diff === 0 ? '오늘' : diff === 1 ? '내일' : dateLabel(nx.dt);
     $('#nextLabel').innerHTML = nx.changed ? '다음 미사 <span class="tag">요일 변경</span>' : '다음 미사';
-    $('#nextWhen').textContent = `${rel} ${pad2(nx.dt.getHours())}:${pad2(nx.dt.getMinutes())} · ${nx.name}`;
+    $('#nextWhen').textContent = `${rel} ${pad2(nx.dt.getHours())}:${pad2(nx.dt.getMinutes())}`;
     $('#nextWhere').textContent = nx.place;
   } else {
     $('#nextLabel').textContent = '다음 미사';
