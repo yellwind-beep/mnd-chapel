@@ -51,11 +51,6 @@
   .next .label { font-size: 13px; opacity: .8; letter-spacing: .04em; }
   .next .when { font-family: var(--serif); font-size: 22px; font-weight: 700; margin-top: 2px; }
   .next .where { font-size: 14px; opacity: .85; }
-  .quick { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 14px; }
-  .quick a { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 14px 8px; text-align: center; text-decoration: none; color: var(--ink); font-size: 14px; font-weight: 500; }
-  .quick a span { display: block; font-size: 20px; margin-bottom: 4px; }
-  .quick a:hover { border-color: var(--accent); }
-  @media (max-width: 480px) { .quick { grid-template-columns: repeat(2, 1fr); } }
 
   /* 섹션 공통 */
   section.block { padding: 36px 0; }
@@ -212,13 +207,6 @@
         <div class="g-head"><span id="gLabel">미사 복음</span><span class="g-ref" id="gRef"></span></div>
         <blockquote id="gVerse"></blockquote>
         <p id="gSummary"></p>
-      </div>
-
-      <div class="quick">
-        <a href="#mass"><span>⛪</span>미사 시간</a>
-        <a href="#notice"><span>📢</span>공지사항</a>
-        <a href="#way"><span>🧭</span>오시는 길</a>
-        <a href="#consult"><span>🕊️</span>상담 신청</a>
       </div>
     </section>
 
