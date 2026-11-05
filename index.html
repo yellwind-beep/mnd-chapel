@@ -86,7 +86,6 @@
   details.notice summary { list-style: none; cursor: pointer; padding: 16px 18px; display: flex; gap: 12px; align-items: baseline; }
   details.notice summary::-webkit-details-marker { display: none; }
   details.notice summary .t { flex: 1; font-weight: 500; }
-  details.notice summary .d { color: var(--muted); font-size: 13px; white-space: nowrap; }
   details.notice.pinned { margin-bottom: 10px; border-color: var(--gold); }
   details.notice .pin { font-size: 12px; color: var(--gold); border: 1px solid var(--gold); border-radius: 999px; padding: 0 8px; white-space: nowrap; }
   details.notice .body { padding: 0 18px 18px; color: #36403a; white-space: pre-line; border-top: 1px dashed var(--line); padding-top: 14px; margin: 0 18px; padding-left: 0; padding-right: 0; }
@@ -495,7 +494,7 @@ function render(data) {
   $('#pinList').innerHTML = pinned.map((n) => {
     const img = safeImg(n['이미지']);
     return `<details class="card notice pinned">
-        <summary><span class="pin">필독</span><span class="t">${esc(n['제목'])}</span>${img ? `<img class="thumb" src="${esc(img)}" alt="" loading="lazy">` : ''}<span class="d">${esc(n['날짜'])}</span></summary>
+        <summary><span class="pin">필독</span><span class="t">${esc(n['제목'])}</span>${img ? `<img class="thumb" src="${esc(img)}" alt="" loading="lazy">` : ''}</summary>
         <div class="body">${img ? `<img class="photo" src="${esc(img)}" alt="${esc(n['제목'])}" loading="lazy">` : ''}${esc(n['내용'])}</div>
       </details>`;
   }).join('');
@@ -506,7 +505,7 @@ function render(data) {
       const pin = /^(y|yes|o|고정|1|true)$/i.test(String(n['고정'] || '').trim());
       const img = safeImg(n['이미지']);
       return `<details class="card notice">
-        <summary>${pin ? '<span class="pin">필독</span>' : ''}<span class="t">${esc(n['제목'])}</span>${img ? `<img class="thumb" src="${esc(img)}" alt="" loading="lazy">` : ''}<span class="d">${esc(n['날짜'])}</span></summary>
+        <summary>${pin ? '<span class="pin">필독</span>' : ''}<span class="t">${esc(n['제목'])}</span>${img ? `<img class="thumb" src="${esc(img)}" alt="" loading="lazy">` : ''}</summary>
         <div class="body">${img ? `<img class="photo" src="${esc(img)}" alt="${esc(n['제목'])}" loading="lazy">` : ''}${esc(n['내용'])}</div>
       </details>`;
     }).join('') : '<div class="card empty">새 공지가 없습니다.</div>';
