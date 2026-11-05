@@ -86,10 +86,8 @@
   details.notice summary::-webkit-details-marker { display: none; }
   details.notice summary .t { flex: 1; font-weight: 500; }
   details.notice summary .d { color: var(--muted); font-size: 13px; white-space: nowrap; }
-  .pinned { padding: 16px 18px; margin-bottom: 12px; border-color: var(--gold); }
-  .pinned .pt { display: flex; gap: 10px; align-items: center; margin-bottom: 8px; }
-  .pinned .pb { color: #36403a; white-space: pre-line; line-height: 1.75; text-wrap: pretty; }
-  .pinned .pin, details.notice .pin { font-size: 12px; color: var(--gold); border: 1px solid var(--gold); border-radius: 999px; padding: 0 8px; white-space: nowrap; }
+  details.notice.pinned { margin-bottom: 10px; border-color: var(--gold); }
+  details.notice .pin { font-size: 12px; color: var(--gold); border: 1px solid var(--gold); border-radius: 999px; padding: 0 8px; white-space: nowrap; }
   details.notice .body { padding: 0 18px 18px; color: #36403a; white-space: pre-line; border-top: 1px dashed var(--line); padding-top: 14px; margin: 0 18px; padding-left: 0; padding-right: 0; }
   details.notice[open] summary .t { color: var(--accent); }
   details.notice summary { align-items: center; }
@@ -489,14 +487,17 @@ function render(data) {
     $('#nextWhere').textContent = '';
   }
 
-  // 공지사항: '고정' 공지는 미사 시간 위에 따로 보여주고, 나머지는 최신순
+  // 공지사항: '고정' 공지는 맨 위에 '필독'으로, 나머지는 최신순 (모두 제목을 누르면 펼쳐짐)
   const isPin = (n) => /^(y|yes|o|고정|1|true)$/i.test(String(n['고정'] || '').trim());
   const byDate = (a, b) => String(b['날짜']).localeCompare(String(a['날짜']));
   const pinned = (data.notices || []).filter(isPin).sort(byDate);
-  $('#pinList').innerHTML = pinned.map((n) => `<div class="card pinned">
-      <div class="pt"><span class="pin">필독</span><b>${esc(n['제목'])}</b></div>
-      <div class="pb">${esc(n['내용'])}</div>
-    </div>`).join('');
+  $('#pinList').innerHTML = pinned.map((n) => {
+    const img = safeImg(n['이미지']);
+    return `<details class="card notice pinned">
+        <summary><span class="pin">필독</span><span class="t">${esc(n['제목'])}</span>${img ? `<img class="thumb" src="${esc(img)}" alt="" loading="lazy">` : ''}<span class="d">${esc(n['날짜'])}</span></summary>
+        <div class="body">${img ? `<img class="photo" src="${esc(img)}" alt="${esc(n['제목'])}" loading="lazy">` : ''}${esc(n['내용'])}</div>
+      </details>`;
+  }).join('');
   const notices = (data.notices || []).filter((n) => !isPin(n)).sort(byDate);
   let shown = NOTICE_PAGE;
   const drawNotices = () => {
