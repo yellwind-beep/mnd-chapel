@@ -83,7 +83,10 @@
   details.notice summary::-webkit-details-marker { display: none; }
   details.notice summary .t { flex: 1; font-weight: 500; }
   details.notice summary .d { color: var(--muted); font-size: 13px; white-space: nowrap; }
-  details.notice .pin { font-size: 12px; color: var(--gold); border: 1px solid var(--gold); border-radius: 999px; padding: 0 8px; white-space: nowrap; }
+  .pinned { padding: 16px 18px; margin-bottom: 12px; border-color: var(--gold); }
+  .pinned .pt { display: flex; gap: 10px; align-items: center; margin-bottom: 8px; }
+  .pinned .pb { color: #36403a; white-space: pre-line; line-height: 1.75; text-wrap: pretty; }
+  .pinned .pin, details.notice .pin { font-size: 12px; color: var(--gold); border: 1px solid var(--gold); border-radius: 999px; padding: 0 8px; white-space: nowrap; }
   details.notice .body { padding: 0 18px 18px; color: #36403a; white-space: pre-line; border-top: 1px dashed var(--line); padding-top: 14px; margin: 0 18px; padding-left: 0; padding-right: 0; }
   details.notice[open] summary .t { color: var(--accent); }
   details.notice summary { align-items: center; }
@@ -215,6 +218,7 @@
     <section class="block" id="mass">
       <h2>미사 · 성사 시간</h2>
       <p class="sub">일정에 따라 바뀔 수 있으니 공지사항도 함께 확인해 주세요.</p>
+      <div id="pinList"></div>
       <div id="changeList"></div>
       <div class="mass-list" id="massList"><div class="skel"></div><div class="skel"></div></div>
     </section>
@@ -533,13 +537,15 @@ function render(data) {
     $('#nextWhere').textContent = '';
   }
 
-  // 공지사항: 고정 먼저, 그다음 최신순
-  const notices = (data.notices || []).slice().sort((a, b) => {
-    const pa = /^(y|yes|o|고정|1|true)$/i.test(String(a['고정'] || '').trim());
-    const pb = /^(y|yes|o|고정|1|true)$/i.test(String(b['고정'] || '').trim());
-    if (pa !== pb) return pa ? -1 : 1;
-    return String(b['날짜']).localeCompare(String(a['날짜']));
-  });
+  // 공지사항: '고정' 공지는 미사 시간 위에 따로 보여주고, 나머지는 최신순
+  const isPin = (n) => /^(y|yes|o|고정|1|true)$/i.test(String(n['고정'] || '').trim());
+  const byDate = (a, b) => String(b['날짜']).localeCompare(String(a['날짜']));
+  const pinned = (data.notices || []).filter(isPin).sort(byDate);
+  $('#pinList').innerHTML = pinned.map((n) => `<div class="card pinned">
+      <div class="pt"><span class="pin">필독</span><b>${esc(n['제목'])}</b></div>
+      <div class="pb">${esc(n['내용'])}</div>
+    </div>`).join('');
+  const notices = (data.notices || []).filter((n) => !isPin(n)).sort(byDate);
   let shown = NOTICE_PAGE;
   const drawNotices = () => {
     $('#noticeList').innerHTML = notices.length ? notices.slice(0, shown).map((n) => {
