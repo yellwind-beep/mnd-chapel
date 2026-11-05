@@ -81,11 +81,11 @@
   .next .tag { display: inline-block; margin-left: 6px; background: var(--gold); color: #fff; font-size: 11px; font-weight: 700; padding: 1px 8px; border-radius: 999px; letter-spacing: 0; vertical-align: 1px; }
 
   /* 공지사항 */
-  .notices { display: grid; gap: 10px; }
+  .notices { display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; }
   details.notice { padding: 0; }
   details.notice summary { list-style: none; cursor: pointer; padding: 16px 18px; display: flex; gap: 12px; align-items: baseline; }
   details.notice summary::-webkit-details-marker { display: none; }
-  details.notice summary .t { flex: 1; font-weight: 500; }
+  details.notice summary .t { flex: 1; min-width: 0; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   details.notice.pinned { margin-bottom: 10px; border-color: var(--gold); }
   details.notice .pin { font-size: 12px; color: var(--gold); border: 1px solid var(--gold); border-radius: 999px; padding: 0 8px; white-space: nowrap; }
   details.notice .body { padding: 0 18px 18px; color: #36403a; white-space: pre-line; border-top: 1px dashed var(--line); padding-top: 14px; margin: 0 18px; padding-left: 0; padding-right: 0; }
@@ -511,8 +511,9 @@ function render(data) {
     }).join('') : '<div class="card empty">새 공지가 없습니다.</div>';
     $('#moreBtn').hidden = notices.length <= shown;
   };
-  $('#moreBtn').onclick = () => { shown += NOTICE_PAGE; drawNotices(); };
+  $('#moreBtn').onclick = () => { shown += NOTICE_PAGE; drawNotices(); fitTitles(); };
   drawNotices();
+  fitTitles();
 
   if (data.updated) {
     const d = new Date(data.updated);
@@ -593,8 +594,19 @@ function fitAddr() {
     if (bsize > 11) { bsize -= 0.5; btn.style.fontSize = bsize + 'px'; btn.style.padding = '6px 8px'; }
   }
 }
-window.addEventListener('resize', fitAddr);
-if (document.fonts) document.fonts.ready.then(fitAddr);
+/* 공지 제목이 한 줄에 들어가도록 글자 크기 자동 조절 (최소 12px, 그래도 길면 … 처리) */
+function fitTitles() {
+  document.querySelectorAll('details.notice summary .t').forEach((el) => {
+    el.style.fontSize = '';
+    let size = parseFloat(getComputedStyle(el).fontSize);
+    while (el.scrollWidth > el.clientWidth && size > 12) {
+      size -= 0.5;
+      el.style.fontSize = size + 'px';
+    }
+  });
+}
+window.addEventListener('resize', () => { fitAddr(); fitTitles(); });
+if (document.fonts) document.fonts.ready.then(() => { fitAddr(); fitTitles(); });
 
 load();
 </script>
