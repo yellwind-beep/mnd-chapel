@@ -487,12 +487,29 @@ function render(data) {
     const ta = parseTime(a['시간']), tb = parseTime(b['시간']);
     return (ta ? ta.h * 60 + ta.m : 0) - (tb ? tb.h * 60 + tb.m : 0);
   });
-  $('#massList').innerHTML = masses.length ? masses.map((r) => `
+  // 이번 주(또는 다음 차례 평소 미사가 있는 주)에 아직 지나지 않은 '미사변경'이 있으면
+  // 평소 미사 카드는 숨기고 위의 변경 안내만 보여줌
+  const changes = normChanges(data.changes, masses);
+  const nextReplaced = (r) => {
+    const tm = parseTime(r['시간']), days = parseDays(r['요일']), now = new Date();
+    if (!tm || !days.length) return false;
+    const weeks = [weekKey(now)];
+    for (let i = 0; i < 8; i++) {
+      const day = startOfDay(now); day.setDate(day.getDate() + i);
+      if (!days.includes(day.getDay())) continue;
+      const dt = new Date(day); dt.setHours(tm.h, tm.m, 0, 0);
+      if (dt > now) { weeks.push(weekKey(day)); break; }
+    }
+    const today0 = startOfDay(now);
+    return changes.some((c) => c.date >= today0 && weeks.includes(c.week) && (c.specific ? c.name === r['이름'] : isMassRow(r)));
+  };
+  const shownMasses = masses.filter((r) => !nextReplaced(r));
+  $('#massList').innerHTML = !masses.length ? '<div class="card empty">등록된 미사 시간이 없습니다.</div>' : shownMasses.map((r) => `
     <div class="card mass">
       <div><div class="day">${esc(dayLabel(r['요일']))}</div><div class="time">${esc(r['시간'])}</div></div>
       <div><div class="name">${esc(r['이름'])}</div>
         <div class="meta">${esc([r['장소'], r['비고']].filter(Boolean).join(' · '))}</div></div>
-    </div>`).join('') : '<div class="card empty">등록된 미사 시간이 없습니다.</div>';
+    </div>`).join('');
 
   // 미사 복음: 오늘 이후 가장 가까운 날짜 한 개
   const todayKey = startOfDay(new Date()).getTime();
@@ -512,7 +529,6 @@ function render(data) {
   }
 
   // 요일 변경 안내
-  const changes = normChanges(data.changes, masses);
   const today = startOfDay(new Date());
   const active = changes.filter((c) => c.date >= today).slice(0, 3);
   $('#changeList').innerHTML = active.map((c) => c.cancel
