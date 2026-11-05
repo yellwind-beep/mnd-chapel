@@ -62,8 +62,6 @@
   .card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); }
 
   /* 미사 시간 */
-  .change { background: #fff8e6; border: 1px solid #ecd9a6; border-left: 4px solid var(--gold); border-radius: 12px; padding: 14px 16px; margin-bottom: 10px; font-size: 14px; color: #5a4a22; }
-  .change b { display: block; font-size: 16px; color: var(--ink); margin-bottom: 2px; }
   .gospel { margin-top: 14px; padding: 18px 20px; border-left: 4px solid var(--gold); }
   .gospel .g-head { display: flex; justify-content: space-between; gap: 10px; align-items: baseline; font-size: 13px; color: var(--muted); letter-spacing: .02em; }
   .gospel .g-head #gLabel { font-weight: 700; color: var(--gold); }
@@ -146,14 +144,14 @@
    * balance/pretty: 마지막 줄에 한두 글자만 남지 않게 줄 길이 고르게 */
   body { word-break: keep-all; overflow-wrap: break-word; }
   a, .g-ref, .d { overflow-wrap: anywhere; }
-  h1, h2, h3, .next .when, .gospel blockquote, .change b { text-wrap: balance; }
-  p, dd, blockquote, .sub, .lead, .body, .change, .help, .privacy, .done p { text-wrap: pretty; }
+  h1, h2, h3, .next .when, .gospel blockquote { text-wrap: balance; }
+  p, dd, blockquote, .sub, .lead, .body, .help, .privacy, .done p { text-wrap: pretty; }
 
   /* 줄 간격: 화면이 좁을수록 조금 넓게, 큰 글씨는 조금 좁게 */
   body { line-height: clamp(1.6, 1.5 + 0.4vw, 1.75); }
   h1 { line-height: 1.3; }
   .gospel blockquote { font-size: clamp(16px, 4.4vw, 19px); line-height: 1.55; }
-  .gospel p, details.notice .body, .change { line-height: 1.75; }
+  .gospel p, details.notice .body { line-height: 1.75; }
 
   @media (max-width: 480px) {
     body { font-size: 15.5px; }
@@ -209,7 +207,6 @@
     <section class="block" id="notice">
       <h2>공지사항</h2>
       <div id="pinList"></div>
-      <div id="changeList"></div>
       <div class="notices" id="noticeList"><div class="skel"></div><div class="skel"></div><div class="skel"></div></div>
       <button class="more" id="moreBtn" hidden>이전 공지 더 보기</button>
     </section>
@@ -484,16 +481,7 @@ function render(data) {
     $('#gospel').hidden = true;
   }
 
-  // 요일 변경 안내
   const today = startOfDay(new Date());
-  const active = changes.filter((c) => c.date >= today).slice(0, 3);
-  $('#changeList').innerHTML = active.map((c) => c.cancel
-    ? `<div class="change"><b>${esc(dateLabel(c.date))}이 있는 주 · ${esc(c.name)} 없음</b>
-         <div>${esc(c.note || '이번 주는 미사가 없습니다.')}</div></div>`
-    : `<div class="change"><b>${esc(dateLabel(c.date))} ${pad2(c.dt.getHours())}:${pad2(c.dt.getMinutes())} · ${esc(c.name)}</b>
-         <div>${esc(c.note || (c.baseDay ? `이번 주는 ${c.baseDay} 대신 ${DAYS[c.date.getDay()]}요일에 드립니다.` : '이번 주 미사 일정이 바뀌었습니다.'))}${c.place ? ' · ' + esc(c.place) : ''}</div></div>`
-  ).join('');
-
   const all = upcoming(masses, changes);
   const massOnly = all.filter((x) => /미사/.test(x.name));
   const nx = (massOnly.length ? massOnly : all)[0];
