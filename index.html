@@ -123,9 +123,12 @@
   .hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
   .submit-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
   .submit-row .btn { padding: 13px 22px; font-size: 16px; }
-  .open-row, #consultBox { margin-top: 14px; }
+  .consult-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  .consult-head h2 { margin: 0; white-space: nowrap; }
+  #consultBox { margin-top: 14px; }
   .consult-intro { margin: 0 0 4px; color: var(--muted); font-size: 14px; line-height: 1.7; text-wrap: pretty; }
-  .open-row .btn { padding: 13px 22px; font-size: 16px; }
+  .open-row .btn { padding: 10px 18px; font-size: 15px; white-space: nowrap; }
+  @media (max-width: 380px) { .open-row .btn { padding: 9px 12px; font-size: 14px; } }
   .submit-row .btn[disabled] { opacity: .6; cursor: wait; }
   .msg { font-size: 14px; }
   .msg.err { color: var(--danger); }
@@ -219,9 +222,11 @@
     </section>
 
     <section class="block" id="consult">
-      <h2>상담 신청</h2>
-      <div class="open-row">
-        <button class="btn" type="button" id="openConsult" aria-expanded="false" aria-controls="consultBox">상담 신청서 작성하기</button>
+      <div class="consult-head">
+        <h2>상담 신청</h2>
+        <div class="open-row">
+          <button class="btn" type="button" id="openConsult" aria-expanded="false" aria-controls="consultBox">상담 신청서 작성하기</button>
+        </div>
       </div>
 
       <div class="card" id="consultBox" hidden>
