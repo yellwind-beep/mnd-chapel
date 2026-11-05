@@ -125,6 +125,8 @@
   .hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
   .submit-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
   .submit-row .btn { padding: 13px 22px; font-size: 16px; }
+  .open-row { margin-top: 14px; }
+  .open-row .btn { padding: 13px 22px; font-size: 16px; }
   .submit-row .btn[disabled] { opacity: .6; cursor: wait; }
   .msg { font-size: 14px; }
   .msg.err { color: var(--danger); }
@@ -247,7 +249,11 @@
         <b>국방헬프콜 1303</b> (24시간) · <b>자살예방상담전화 109</b> (24시간)
       </div>
 
-      <div class="card" id="consultBox">
+      <div class="open-row">
+        <button class="btn" type="button" id="openConsult" aria-expanded="false" aria-controls="consultBox">상담 신청서 작성하기</button>
+      </div>
+
+      <div class="card" id="consultBox" hidden>
         <form class="consult" id="consultForm" novalidate>
           <div class="two">
             <div class="field">
@@ -574,6 +580,13 @@ async function load() {
 }
 
 /* 상담 신청 */
+$('#openConsult').addEventListener('click', (ev) => {
+  ev.currentTarget.setAttribute('aria-expanded', 'true');
+  ev.currentTarget.parentElement.hidden = true;
+  $('#consultBox').hidden = false;
+  $('#f-name').focus();
+});
+
 $('#consultForm').addEventListener('submit', async (ev) => {
   ev.preventDefault();
   const f = ev.target, msg = $('#formMsg'), btn = $('#submitBtn');
