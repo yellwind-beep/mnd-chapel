@@ -6,6 +6,7 @@
  * - 상담 신청은 '상담신청' 탭에 저장됩니다. 이 탭은 홈페이지에 절대 공개되지 않습니다.
  *
  * 처음 한 번: 위쪽 함수 선택 목록에서 'setup'을 고르고 [실행]을 누르세요.
+ * 복음 자동 채우기: 'setupGospel'을 한 번 실행하세요. (굿뉴스 매일미사에서 복음 출처·핵심구절을 가져옵니다)
  */
 
 // 새 상담 신청이 들어오면 알림을 받을 이메일 (비워두면 알림 없음)
@@ -166,6 +167,191 @@ function setup() {
   sh.getRange('J2:J').setDataValidation(rule);
 
   ss.toast('초기설정이 끝났습니다. 각 탭의 내용을 고쳐 쓰세요.');
+}
+
+/* ---------- 복음 자동 채우기 (굿뉴스 매일미사) ----------
+ * 미사가 있는 날(평소 미사 + 미사변경 탭)의 복음 출처와 핵심구절을
+ * 굿뉴스 매일미사에서 가져와 '복음' 탭에 채웁니다.
+ * - 미사시간·미사변경 탭을 고치면 바로, 그리고 매일 새벽 5시에 한 번 실행됩니다.
+ * - 직접 적은 칸은 덮어쓰지 않습니다.
+ * - 자동으로 만든 줄은 '자동' 칸에 Y가 표시되고, 미사 날짜가 바뀌면 알아서 정리됩니다.
+ *   그 줄을 직접 고치면 Y가 지워져 그대로 남습니다.
+ */
+const 굿뉴스_주소 = 'https://maria.catholic.or.kr/mi_pr/missa/missa.asp?menu=missa&missatype=DA&gomonth=';
+const 취소표시 = /없음|취소|쉼|휴/;
+
+// 처음 한 번 실행: 자동 실행 예약을 만들고 바로 한 번 채웁니다.
+function setupGospel() {
+  ScriptApp.getProjectTriggers().forEach((t) => {
+    if (['복음편집감지', '복음채우기'].includes(t.getHandlerFunction())) ScriptApp.deleteTrigger(t);
+  });
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  ScriptApp.newTrigger('복음편집감지').forSpreadsheet(ss).onEdit().create();
+  ScriptApp.newTrigger('복음채우기').timeBased().everyDays(1).atHour(5).inTimezone('Asia/Seoul').create();
+  const n = 복음채우기();
+  ss.toast(`복음 자동 채우기를 켰습니다. (${n}개 날짜 확인)`);
+}
+
+function 복음편집감지(e) {
+  const sh = e && e.range && e.range.getSheet();
+  if (!sh) return;
+  const 이름 = sh.getName();
+  if (이름 === 탭.복음) {
+    // 사람이 복음·핵심구절 칸을 고치면 그 줄은 자동 관리에서 빠짐
+    const 열 = 복음열_(sh);
+    if (!열.자동) return;
+    for (let r = e.range.getRow(); r <= e.range.getLastRow(); r++) {
+      if (r < 2) continue;
+      const c1 = e.range.getColumn(), c2 = e.range.getLastColumn();
+      const 고친칸 = [열.복음, 열.핵심구절, 열.요약].some((c) => c && c >= c1 && c <= c2);
+      if (고친칸) sh.getRange(r, 열.자동).setValue('');
+    }
+    return;
+  }
+  if (이름 === 탭.변경 || 이름 === 탭.미사) 복음채우기();
+}
+
+function 복음채우기() {
+  const lock = LockService.getScriptLock();
+  if (!lock.tryLock(20000)) return 0;
+  try {
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    const sh = ss.getSheetByName(탭.복음);
+    if (!sh) return 0;
+    const 열 = 복음열_(sh, true);
+    const 대상 = 미사날짜들_(ss);              // 'yyyy-MM-dd' 목록
+    const 오늘 = 날짜키_(new Date());
+
+    const 값 = sh.getDataRange().getValues();
+
+    // 미사가 없어진 날의 자동 줄 정리 (오늘 이후만, 아래에서부터 지움)
+    for (let i = 값.length - 1; i >= 1; i--) {
+      const k = 날짜키_(값[i][열.날짜 - 1]);
+      if (k && k >= 오늘 && 값[i][열.자동 - 1] === 'Y' && !대상.includes(k)) sh.deleteRow(i + 1);
+    }
+
+    // 대상 날짜 채우기
+    let 확인 = 0;
+    const 최신 = sh.getDataRange().getValues();
+    const 위치 = {};
+    for (let i = 1; i < 최신.length; i++) {
+      const k = 날짜키_(최신[i][열.날짜 - 1]);
+      if (k && !위치[k]) 위치[k] = i + 1;
+    }
+    대상.forEach((k) => {
+      const r = 위치[k];
+      const 기존 = r ? 최신[r - 1] : null;
+      const 출처있음 = 기존 && String(기존[열.복음 - 1]).trim();
+      const 구절있음 = 기존 && String(기존[열.핵심구절 - 1]).trim();
+      if (출처있음 && 구절있음) return;
+      const g = 굿뉴스복음_(k);
+      확인++;
+      if (!g) return;
+      if (r) {
+        if (!출처있음 && g.출처) sh.getRange(r, 열.복음).setValue(g.출처);
+        if (!구절있음 && g.핵심구절) sh.getRange(r, 열.핵심구절).setValue(g.핵심구절);
+      } else {
+        const 새줄 = Array(Math.max(열.자동, sh.getLastColumn())).fill('');
+        const [y, m, d] = k.split('-').map(Number);
+        새줄[열.날짜 - 1] = new Date(y, m - 1, d);
+        새줄[열.복음 - 1] = g.출처;
+        새줄[열.핵심구절 - 1] = g.핵심구절;
+        새줄[열.자동 - 1] = 'Y';
+        sh.appendRow(새줄);
+        sh.getRange(sh.getLastRow(), 열.날짜).setNumberFormat('yyyy-mm-dd');
+      }
+    });
+
+    // 날짜순 정렬
+    if (sh.getLastRow() > 2) sh.getRange(2, 1, sh.getLastRow() - 1, sh.getLastColumn()).sort(열.날짜);
+    return 확인;
+  } finally {
+    lock.releaseLock();
+  }
+}
+
+// 앞으로 3주 동안 미사가 있는 날짜 (홈페이지 계산 방식과 같음)
+function 미사날짜들_(ss) {
+  const 요일글자 = ['일', '월', '화', '수', '목', '금', '토'];
+  const 미사 = 표읽기_(ss.getSheetByName(탭.미사)).filter((r) => /미사/.test(r['이름'] || ''));
+  const 변경 = 표읽기_(ss.getSheetByName(탭.변경))
+    .map((r) => ({ 날짜: 글날짜_(r['날짜']), 취소: 취소표시.test(r['시간'] || ''), 이름: r['이름'] || '' }))
+    .filter((c) => c.날짜);
+  const 오늘 = 글날짜_(날짜키_(new Date()));   // 한국 시간 기준 오늘
+  const 주키 = (d) => { const x = new Date(d); x.setDate(x.getDate() - ((x.getDay() + 6) % 7)); return 날짜키_(x); };
+  const out = new Set();
+
+  for (let i = 0; i < 21; i++) {
+    const d = new Date(오늘); d.setDate(d.getDate() + i);
+    미사.forEach((r) => {
+      const 요일 = String(r['요일'] || '');
+      const 해당 = /매일/.test(요일) || (/평일/.test(요일) && d.getDay() >= 1 && d.getDay() <= 5) ||
+        (/주일/.test(요일) && d.getDay() === 0) || 요일.replace(/주일/g, '').includes(요일글자[d.getDay()]);
+      if (!해당) return;
+      const 바뀜 = 변경.some((c) => 주키(c.날짜) === 주키(d) && (!c.이름 || c.이름 === r['이름']));
+      if (!바뀜) out.add(날짜키_(d));
+    });
+  }
+  const 끝 = new Date(오늘); 끝.setDate(끝.getDate() + 60);
+  변경.forEach((c) => { if (!c.취소 && c.날짜 >= 오늘 && c.날짜 <= 끝) out.add(날짜키_(c.날짜)); });
+  return [...out].sort();
+}
+
+// 굿뉴스 매일미사에서 그날 복음의 출처와 핵심구절(꺾쇠 안 문장)을 가져옴
+function 굿뉴스복음_(날짜키) {
+  try {
+    const res = UrlFetchApp.fetch(굿뉴스_주소 + 날짜키, { muteHttpExceptions: true, followRedirects: true });
+    if (res.getResponseCode() !== 200) return null;
+    return 복음뽑기_(res.getContentText('UTF-8'));
+  } catch (err) {
+    console.warn('굿뉴스 연결 실패 ' + 날짜키 + ': ' + err.message);
+    return null;
+  }
+}
+
+function 복음뽑기_(html) {
+  const i = html.search(/<h3[^>]*>\s*복음\s*<\/h3>/);
+  if (i < 0) return null;
+  const span = (html.slice(i, i + 6000).match(/<span[^>]*>([\s\S]*?)<\/span>/) || [])[1] || '';
+  const 줄 = span.split(/<br\s*\/?>/i).map((s) => 글자만_(s)).filter(Boolean);
+  const 핵심구절 = ((줄[0] || '').match(/^<\s*([\s\S]+?)\s*>$/) || [])[1] || '';
+  const 출처줄 = 줄.find((l) => /거룩한\s*복음입니다/.test(l)) || '';
+  const m = 출처줄.match(/✠?\s*(\S+?)(?:가|이)\s*전한\s*거룩한\s*복음입니다\.?\s*(.*)$/);
+  const 출처 = m ? (m[1] + ' ' + m[2].trim()).trim() : '';
+  if (!출처 && !핵심구절) return null;
+  return { 출처, 핵심구절 };
+}
+
+function 글자만_(s) {
+  return String(s)
+    .replace(/<[^>]+>/g, '')
+    .replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"')
+    .replace(/&#39;|&apos;/g, "'").replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&')
+    .replace(/\s+/g, ' ').trim();
+}
+
+// 복음 탭의 열 위치 (없으면 '자동' 열을 만듦)
+function 복음열_(sh, 만들기) {
+  const 머리 = sh.getRange(1, 1, 1, Math.max(1, sh.getLastColumn())).getDisplayValues()[0].map((h) => String(h).trim());
+  const 찾기 = (n) => { const i = 머리.indexOf(n); return i < 0 ? 0 : i + 1; };
+  const 열 = { 날짜: 찾기('날짜') || 1, 복음: 찾기('복음') || 2, 핵심구절: 찾기('핵심구절') || 3, 요약: 찾기('요약'), 자동: 찾기('자동') };
+  if (!열.자동 && 만들기) {
+    열.자동 = 머리.length + 1;
+    sh.getRange(1, 열.자동).setValue('자동').setFontWeight('bold').setBackground('#e6ece6')
+      .setNote('Y: 굿뉴스에서 자동으로 채운 줄 (직접 고치면 지워지고, 그 줄은 그대로 남습니다)');
+  }
+  return 열;
+}
+
+function 날짜키_(v) {
+  if (v instanceof Date && !isNaN(v)) return Utilities.formatDate(v, 'Asia/Seoul', 'yyyy-MM-dd');
+  const d = 글날짜_(v);
+  return d ? Utilities.formatDate(d, 'Asia/Seoul', 'yyyy-MM-dd') : '';
+}
+
+function 글날짜_(t) {
+  const m = String(t || '').match(/(\d{4})\D+(\d{1,2})\D+(\d{1,2})/);
+  return m ? new Date(+m[1], +m[2] - 1, +m[3]) : null;
 }
 
 /* ---------- 내부 도우미 ---------- */
