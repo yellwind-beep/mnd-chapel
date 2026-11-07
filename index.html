@@ -3,6 +3,14 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#f6f3ec">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="국방부 성당">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <title>국방부 직원 성당</title>
 <meta name="description" content="국방부 직원 성당 - 미사 시간, 공지사항, 오시는 길, 상담 신청 안내">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -695,6 +703,11 @@ window.addEventListener('resize', () => { fitAddr(); fitTitles(); });
 if (document.fonts) document.fonts.ready.then(() => { fitAddr(); fitTitles(); });
 
 load();
+
+/* 앱(홈 화면에 추가)용: 오프라인 대비 */
+if ('serviceWorker' in navigator && location.protocol === 'https:') {
+  window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js').catch(() => {}); });
+}
 </script>
 </body>
 </html>
