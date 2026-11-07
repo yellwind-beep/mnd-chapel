@@ -170,7 +170,7 @@ function setup() {
 }
 
 /* ---------- 복음 자동 채우기 (굿뉴스 매일미사) ----------
- * 미사가 있는 날(평소 미사 + 미사변경 탭)의 복음 출처와 핵심구절을
+ * 날마다(또는 미사가 있는 날만) 복음 출처와 핵심구절을
  * 굿뉴스 매일미사에서 가져와 '복음' 탭에 채웁니다.
  * - 미사시간·미사변경 탭을 고치면 바로, 그리고 매일 새벽 5시에 한 번 실행됩니다.
  * - 직접 적은 칸은 덮어쓰지 않습니다.
@@ -179,6 +179,10 @@ function setup() {
  */
 const 굿뉴스_주소 = 'https://maria.catholic.or.kr/mi_pr/missa/missa.asp?menu=missa&missatype=DA&gomonth=';
 const 취소표시 = /없음|취소|쉼|휴/;
+// true: 미사와 상관없이 날마다 그날 복음을 채움 (홈페이지에 '오늘의 복음'이 매일 바뀜)
+// false: 우리 성당 미사가 있는 날의 복음만 채움
+const 복음_매일 = true;
+const 복음_며칠앞까지 = 7;
 
 // 처음 한 번 실행: 자동 실행 예약을 만들고 바로 한 번 채웁니다.
 function setupGospel() {
@@ -219,7 +223,7 @@ function 복음채우기() {
     const sh = ss.getSheetByName(탭.복음);
     if (!sh) return 0;
     const 열 = 복음열_(sh, true);
-    const 대상 = 미사날짜들_(ss);              // 'yyyy-MM-dd' 목록
+    const 대상 = 복음_매일 ? 날마다_(복음_며칠앞까지) : 미사날짜들_(ss);   // 'yyyy-MM-dd' 목록
     const 오늘 = 날짜키_(new Date());
 
     const 값 = sh.getDataRange().getValues();
@@ -267,6 +271,14 @@ function 복음채우기() {
   } finally {
     lock.releaseLock();
   }
+}
+
+// 오늘부터 n일 동안 날마다
+function 날마다_(n) {
+  const 오늘 = 글날짜_(날짜키_(new Date()));
+  const out = [];
+  for (let i = 0; i < n; i++) { const d = new Date(오늘); d.setDate(d.getDate() + i); out.push(날짜키_(d)); }
+  return out;
 }
 
 // 앞으로 3주 동안 미사가 있는 날짜 (홈페이지 계산 방식과 같음)
