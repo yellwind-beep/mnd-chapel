@@ -258,12 +258,11 @@ function 복음채우기() {
         새줄[열.핵심구절 - 1] = g.핵심구절;
         새줄[열.자동 - 1] = 'Y';
         sh.appendRow(새줄);
-        sh.getRange(sh.getLastRow(), 열.날짜).setNumberFormat('yyyy-mm-dd');
+        // 날짜 표시 형식은 첫 줄(2행)에 맞춤
+        const 형식 = sh.getLastRow() > 2 ? sh.getRange(2, 열.날짜).getNumberFormat() : '';
+        sh.getRange(sh.getLastRow(), 열.날짜).setNumberFormat(형식 && 형식 !== '@' ? 형식 : 'yyyy. m. d');
       }
     });
-
-    // 날짜순 정렬
-    if (sh.getLastRow() > 2) sh.getRange(2, 1, sh.getLastRow() - 1, sh.getLastColumn()).sort(열.날짜);
     return 확인;
   } finally {
     lock.releaseLock();
