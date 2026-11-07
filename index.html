@@ -92,6 +92,10 @@
   .gospel { margin-top: 14px; padding: 18px 20px; border-left: 4px solid var(--gold); }
   .gospel .g-head { display: flex; justify-content: space-between; gap: 10px; align-items: baseline; font-size: 13px; color: var(--muted); letter-spacing: .02em; }
   .gospel .g-head #gLabel { font-weight: 700; color: var(--gold); }
+  .gospel .g-left { display: flex; flex-wrap: wrap; align-items: baseline; column-gap: 8px; min-width: 0; }
+  .gospel .g-day { color: var(--ink); opacity: .72; font-weight: 500; }
+  .gospel .g-day:empty { display: none; }
+  .gospel .g-ref { flex: none; white-space: nowrap; }
   .gospel blockquote { margin: 10px 0 0; font-family: var(--serif); font-size: 18px; line-height: 1.6; color: var(--ink); }
   .gospel .g-link { display: block; color: inherit; text-decoration: none; -webkit-tap-highlight-color: transparent; }
   .gospel .g-link:hover blockquote, .gospel .g-link:focus-visible blockquote { text-decoration: underline; text-decoration-color: var(--gold); text-underline-offset: 4px; }
@@ -312,7 +316,7 @@
       </div>
 
       <div class="card gospel" id="gospel" hidden>
-        <div class="g-head"><span id="gLabel">미사 복음</span><span class="g-ref" id="gRef"></span></div>
+        <div class="g-head"><span class="g-left"><span id="gLabel">미사 복음</span><span class="g-day" id="gDay"></span></span><span class="g-ref" id="gRef"></span></div>
         <a class="g-link" id="gLink" href="https://maria.catholic.or.kr/mi_pr/missa/missa.asp" target="_blank" rel="noopener" aria-label="굿뉴스 매일미사에서 이 날 복음 보기 (새 창)"><blockquote id="gVerse"></blockquote></a>
       </div>
 
@@ -586,6 +590,7 @@ function render(data) {
   if (g) {
     $('#gLabel').textContent = g.d.getTime() === todayKey ? '오늘의 복음' : `${dateLabel(g.d)} 복음`;
     $('#gRef').textContent = g.r['복음'] || '';
+    $('#gDay').textContent = g.r['전례'] || '';
     $('#gVerse').textContent = g.r['핵심구절'];
     const ymd = `${g.d.getFullYear()}-${String(g.d.getMonth() + 1).padStart(2, '0')}-${String(g.d.getDate()).padStart(2, '0')}`;
     $('#gLink').href = `https://maria.catholic.or.kr/mi_pr/missa/missa.asp?menu=missa&missatype=DA&gomonth=${ymd}`;

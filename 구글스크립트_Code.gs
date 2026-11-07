@@ -207,7 +207,7 @@ function 복음편집감지(e) {
     for (let r = e.range.getRow(); r <= e.range.getLastRow(); r++) {
       if (r < 2) continue;
       const c1 = e.range.getColumn(), c2 = e.range.getLastColumn();
-      const 고친칸 = [열.복음, 열.핵심구절, 열.요약].some((c) => c && c >= c1 && c <= c2);
+      const 고친칸 = [열.복음, 열.핵심구절, 열.요약, 열.전례].some((c) => c && c >= c1 && c <= c2);
       if (고친칸) sh.getRange(r, 열.자동).setValue('');
     }
     return;
@@ -247,19 +247,22 @@ function 복음채우기() {
       const 기존 = r ? 최신[r - 1] : null;
       const 출처있음 = 기존 && String(기존[열.복음 - 1]).trim();
       const 구절있음 = 기존 && String(기존[열.핵심구절 - 1]).trim();
-      if (출처있음 && 구절있음) return;
+      const 전례있음 = 기존 && String(기존[열.전례 - 1] || '').trim();
+      if (출처있음 && 구절있음 && 전례있음) return;
       const g = 굿뉴스복음_(k);
       확인++;
       if (!g) return;
       if (r) {
         if (!출처있음 && g.출처) sh.getRange(r, 열.복음).setValue(g.출처);
         if (!구절있음 && g.핵심구절) sh.getRange(r, 열.핵심구절).setValue(g.핵심구절);
+        if (!전례있음 && g.전례) sh.getRange(r, 열.전례).setValue(g.전례);
       } else {
-        const 새줄 = Array(Math.max(열.자동, sh.getLastColumn())).fill('');
+        const 새줄 = Array(Math.max(열.자동, 열.전례, sh.getLastColumn())).fill('');
         const [y, m, d] = k.split('-').map(Number);
         새줄[열.날짜 - 1] = new Date(y, m - 1, d);
         새줄[열.복음 - 1] = g.출처;
         새줄[열.핵심구절 - 1] = g.핵심구절;
+        새줄[열.전례 - 1] = g.전례;
         새줄[열.자동 - 1] = 'Y';
         sh.appendRow(새줄);
         // 날짜 표시 형식은 첫 줄(2행)에 맞춤
@@ -330,7 +333,19 @@ function 복음뽑기_(html) {
   const m = 출처줄.match(/✠?\s*(\S+?)(?:가|이)\s*전한\s*거룩한\s*복음입니다\.?\s*(.*)$/);
   const 출처 = m ? (m[1] + ' ' + m[2].trim()).trim() : '';
   if (!출처 && !핵심구절) return null;
-  return { 출처, 핵심구절 };
+  return { 출처, 핵심구절, 전례: 전례뽑기_(html) };
+}
+
+// 전례일: '[(녹) 연중 제32주일(평신도 주일)]' → '(녹)연중 제32주일'
+// 끝에 붙은 괄호 설명과 ' - 첫째 미사' 같은 미사 구분은 뺍니다.
+function 전례뽑기_(html) {
+  const raw = 글자만_((html.match(/<p[^>]*class="[^"]*m_t_today01[^"]*"[^>]*>([\s\S]*?)<\/p>/) || [])[1] || '');
+  let t = raw.replace(/^\[\s*/, '').replace(/\s*\]$/, '');
+  const 색 = (t.match(/^\(([^)]{1,2})\)\s*/) || [])[0] || '';
+  t = t.slice(색.length).replace(/\s+-\s+.*$/, '');
+  while (/\s*\([^()]*\)\s*$/.test(t)) t = t.replace(/\s*\([^()]*\)\s*$/, '');
+  t = t.trim();
+  return t ? 색.replace(/\s+$/, '') + t : '';
 }
 
 function 글자만_(s) {
@@ -345,11 +360,17 @@ function 글자만_(s) {
 function 복음열_(sh, 만들기) {
   const 머리 = sh.getRange(1, 1, 1, Math.max(1, sh.getLastColumn())).getDisplayValues()[0].map((h) => String(h).trim());
   const 찾기 = (n) => { const i = 머리.indexOf(n); return i < 0 ? 0 : i + 1; };
-  const 열 = { 날짜: 찾기('날짜') || 1, 복음: 찾기('복음') || 2, 핵심구절: 찾기('핵심구절') || 3, 요약: 찾기('요약'), 자동: 찾기('자동') };
+  const 열 = { 날짜: 찾기('날짜') || 1, 복음: 찾기('복음') || 2, 핵심구절: 찾기('핵심구절') || 3, 요약: 찾기('요약'), 자동: 찾기('자동'), 전례: 찾기('전례') };
   if (!열.자동 && 만들기) {
     열.자동 = 머리.length + 1;
     sh.getRange(1, 열.자동).setValue('자동').setFontWeight('bold').setBackground('#e6ece6')
       .setNote('Y: 굿뉴스에서 자동으로 채운 줄 (직접 고치면 지워지고, 그 줄은 그대로 남습니다)');
+    머리[열.자동 - 1] = '자동';
+  }
+  if (!열.전례 && 만들기) {
+    열.전례 = 머리.length + 1;
+    sh.getRange(1, 열.전례).setValue('전례').setFontWeight('bold').setBackground('#e6ece6')
+      .setNote('그날 전례일 (예: (녹)연중 제32주일). 홈페이지 복음 카드 제목 옆에 표시됩니다.');
   }
   return 열;
 }
