@@ -1,0 +1,10 @@
+[{
+  "relation": ["delegate_permission/common.handle_all_urls"],
+  "target": {
+    "namespace": "android_app",
+    "package_name": "kr.mndchapel.app",
+    "sha256_cert_fingerprints": [
+      "78:BA:D5:9C:0D:E6:6B:57:D3:05:36:C0:3F:88:34:4A:23:EF:AA:80:01:8B:36:2E:AD:22:4F:7E:94:17:D6:63"
+    ]
+  }
+}]
