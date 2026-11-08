@@ -92,12 +92,13 @@
   .jubo .j-txt { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; line-height: 1.35; }
   .jubo .j-txt b { font-size: 16px; font-weight: 700; }
   .jubo .j-txt small { font-size: 13px; color: var(--muted); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .duo { margin-top: 10px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-  .duo:has(> .jubo[hidden]) { grid-template-columns: 1fr; }
-  .duo .jubo { margin-top: 0; padding: 12px 12px; gap: 10px; min-width: 0; }
+  .duo { margin-top: 10px; display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 10px; }
+  .duo .jubo { margin-top: 0; padding: 12px 12px; gap: 8px; min-width: 0; flex-direction: column; align-items: flex-start; }
+  .duo .jubo .j-txt { width: 100%; }
   .duo .jubo .j-txt b { font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .jubo .j-ic.yt { background: #b23a2e; }
-  @media (max-width: 480px) { .duo .jubo .j-txt b { font-size: 14px; } .duo .jubo .j-ic { width: 30px; height: 30px; border-radius: 8px; } .duo .jubo { gap: 8px; } }
+  .jubo .j-ic.bp { background: #a9853d; }
+  @media (max-width: 480px) { .duo .jubo .j-txt b { font-size: 14px; } .duo .jubo .j-ic { width: 28px; height: 28px; border-radius: 8px; } .duo .jubo { gap: 6px; } }
   .jubo[hidden] { display: none; }
 
   /* 미사 시간 */
@@ -349,11 +350,15 @@
       <div class="duo">
         <a class="jubo" id="jubo" href="https://www.gunjong.or.kr/parish/weekly.asp" target="_blank" rel="noopener" hidden>
           <span class="j-ic" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f6f3ec" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h11l3 3v13H5z"/><path d="M8.5 10h7M8.5 13.5h7M8.5 17h4"/></svg></span>
-          <span class="j-txt"><b>군종교구 주보</b><small id="juboSub">이번 주 주보 보기</small></span>
+          <span class="j-txt"><b>교구 주보</b><small id="juboSub">이번 주</small></span>
         </a>
         <a class="jubo" id="youtube" href="https://www.youtube.com/@cagunjong" target="_blank" rel="noopener" aria-label="군종교구 유튜브 채널 바로가기 (새 창)">
           <span class="j-ic yt" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="#f6f3ec"><path d="M9 7.2v9.6l8-4.8z"/></svg></span>
-          <span class="j-txt"><b>군종교구 유튜브</b><small>영상 보러 가기</small></span>
+          <span class="j-txt"><b>교구 유튜브</b><small>영상 보기</small></span>
+        </a>
+        <a class="jubo" id="bishop" href="https://www.gunjong.or.kr/parish/photo.asp" target="_blank" rel="noopener" aria-label="주교님 동정 최근 소식 보기 (새 창)">
+          <span class="j-ic bp" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f6f3ec" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="6" width="17" height="13" rx="2"/><circle cx="12" cy="12.5" r="3.2"/><path d="M8.5 6l1.4-2h4.2l1.4 2"/></svg></span>
+          <span class="j-txt"><b>주교님 동정</b><small id="bishopSub">최근 소식</small></span>
         </a>
       </div>
     </section>
@@ -634,13 +639,23 @@ function render(data) {
   const jb = data.jubo;
   if (jb && /^https:\/\/(www\.)?gunjong\.or\.kr\//.test(jb.pdf || '')) {
     const jd = parseDate(jb.date);
-    $('#juboSub').textContent = jb.title || (jd ? `${jd.getMonth() + 1}월 ${jd.getDate()}일` : '이번 주 주보');
+    $('#juboSub').textContent = jd ? `${jd.getMonth() + 1}월 ${jd.getDate()}일` : (jb.title || '이번 주');
     $('#jubo').title = [jd ? `${jd.getMonth() + 1}월 ${jd.getDate()}일` : '', jb.title || ''].filter(Boolean).join(' ');
     $('#jubo').href = jb.pdf;
     $('#jubo').setAttribute('aria-label', `군종교구 주보 ${jb.title || ''} PDF 보기 (새 창)`);
     $('#jubo').hidden = false;
   } else {
     $('#jubo').hidden = true;
+  }
+
+  // 주교님 동정 (최근 게시물)
+  const bp = data.bishop;
+  if (bp && /^https:\/\/(www\.)?gunjong\.or\.kr\//.test(bp.url || '')) {
+    const bd = parseDate(bp.date);
+    $('#bishopSub').textContent = bd ? `${bd.getMonth() + 1}월 ${bd.getDate()}일` : '최근 소식';
+    $('#bishop').href = bp.url;
+    $('#bishop').title = bp.title || '';
+    $('#bishop').setAttribute('aria-label', `주교님 동정: ${bp.title || '최근 소식'} (새 창)`);
   }
 
   const all = upcoming(masses, changes);

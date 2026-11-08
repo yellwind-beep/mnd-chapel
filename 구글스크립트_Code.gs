@@ -34,6 +34,7 @@ function doGet() {
     gospel: 표읽기_(ss.getSheetByName(탭.복음)),
     notices: 표읽기_(ss.getSheetByName(탭.공지)),
     jubo: 주보_(),
+    bishop: 동정_(),
     updated: new Date().toISOString(),
   });
 }
@@ -71,6 +72,35 @@ function 주보뽑기_(html) {
   const 제목 = 글자만_((줄.match(/weekly_detail\.asp[^>]*>([\s\S]*?)<\/a>/i) || [])[1] || '');
   const 날짜 = (줄.match(/(\d{4}-\d{2}-\d{2})/) || [])[1] || '';
   return { title: 제목, date: 날짜, pdf: 'https://www.gunjong.or.kr' + encodeURI(경로) };
+}
+
+/* ---------- 주교님 동정 (최근 게시물) ----------
+ * 군종교구 홈페이지 '주교님 동정' 사진 게시판의 맨 위(최신) 글 제목·날짜·주소를 가져옵니다.
+ */
+const 동정_목록 = 'https://www.gunjong.or.kr/parish/photo.asp';
+
+function 동정_() {
+  const cache = CacheService.getScriptCache();
+  const hit = cache.get('bishop');
+  if (hit) return JSON.parse(hit);
+  try {
+    const res = UrlFetchApp.fetch(동정_목록, { muteHttpExceptions: true, followRedirects: true });
+    if (res.getResponseCode() !== 200) return null;
+    const b = 동정뽑기_(res.getContentText('UTF-8'));
+    if (b) cache.put('bishop', JSON.stringify(b), 3600);
+    return b;
+  } catch (err) {
+    console.warn('주교님 동정 불러오기 실패: ' + err.message);
+    return null;
+  }
+}
+
+function 동정뽑기_(html) {
+  const m = html.match(/<a[^>]*href="\.?\/?(photo_detail\.asp\?idx=(\d+))[^"]*"[^>]*>([\s\S]*?)<\/a>/i);
+  if (!m) return null;
+  const 제목 = 글자만_((m[3].match(/<strong>([\s\S]*?)<\/strong>/i) || [])[1] || '');
+  const 날짜 = (m[3].match(/(\d{4}-\d{2}-\d{2})/) || [])[1] || '';
+  return { title: 제목, date: 날짜, url: 'https://www.gunjong.or.kr/parish/photo_detail.asp?idx=' + m[2] };
 }
 
 /* ---------- 상담 신청이 들어올 때 ---------- */
