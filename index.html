@@ -370,6 +370,63 @@
     details.notice summary { padding: 15px 18px; }
     .act { padding: 14px 14px; }
   }
+  /* ===== 최종 조정: 다음 미사·오늘의 복음을 키우고, 나머지 간격·여백은 줄이기 ===== */
+  @media (max-width: 480px) {
+    main > .wrap > .sp { max-height: 8px; }
+    section.block { padding: 4px 0; }
+    .hero { padding: 2px 0 4px; }
+    /* 크게 */
+    .next { padding: 16px 18px; }
+    .next .label { font-size: 13px; }
+    .next .when { font-size: clamp(20px, 5.9vw, 22px); }
+    .next .where { font-size: 14px; }
+    .gospel { margin-top: 8px; padding: 14px 16px 15px 17px; }
+    .gospel .g-head { font-size: 12.5px; }
+    .gospel blockquote { margin-top: 6px; font-size: clamp(17px, 4.8vw, 18.5px); line-height: 1.5; }
+    /* 작게 */
+    .guide { margin-top: 7px; padding: 7px 12px; gap: 9px; }
+    .guide .g-ic { width: 28px; height: 28px; }
+    .guide .g-txt b { font-size: 14.5px; }
+    .guide .g-txt small { font-size: 11.5px; }
+    .duo { margin-top: 7px; gap: 7px; }
+    .duo .jubo { padding: 7px 9px; gap: 4px; }
+    .duo .jubo .j-ic { width: 26px; height: 26px; border-radius: 7px; }
+    .duo .jubo .j-ic svg { width: 15px; height: 15px; }
+    .duo .jubo .j-txt b { font-size: 13.5px; }
+    .duo .jubo .j-txt small { font-size: 11.5px; }
+    .sec-head h2 { font-size: 15px; }
+    .nlist { margin-top: 5px; }
+    .nlist details.notice summary { padding: 7px 12px; }
+    details.notice .thumb { width: 38px; height: 25px; }
+    .acts { gap: 7px; }
+    .act { padding: 7px 10px; gap: 8px; }
+    .act .a-ic { width: 28px; height: 28px; }
+    .act .a-ic svg { width: 16px; height: 16px; }
+    .act .a-txt b { font-size: 14px; }
+    .act .a-txt small { font-size: 11.5px; }
+  }
+  @media (max-width: 480px) and (min-height: 700px) {
+    main > .wrap > .sp { max-height: 12px; }
+    .next { padding: 20px 20px; }
+    .next .label { font-size: 13.5px; }
+    .next .when { font-size: clamp(22px, 6.4vw, 25px); margin-top: 2px; }
+    .next .where { font-size: 15px; }
+    .gospel { margin-top: 10px; padding: 17px 18px 18px 19px; }
+    .gospel .g-head { font-size: 13px; }
+    .gospel blockquote { margin-top: 8px; font-size: clamp(18.5px, 5.3vw, 20.5px); }
+    .guide { margin-top: 10px; padding: 10px 14px; }
+    .duo { margin-top: 10px; gap: 8px; }
+    .duo .jubo { padding: 10px 11px; gap: 6px; }
+    .duo .jubo .j-ic { width: 30px; height: 30px; }
+    .nlist details.notice summary { padding: 10px 14px; }
+    .act { padding: 10px 12px; }
+  }
+  @media (max-width: 480px) and (min-height: 800px) {
+    .next { padding: 24px 22px; }
+    .next .when { font-size: clamp(23px, 6.8vw, 27px); }
+    .gospel { margin-top: 12px; padding: 20px 20px 22px 21px; }
+    .gospel blockquote { margin-top: 10px; font-size: clamp(19.5px, 5.6vw, 22px); }
+  }
 </style>
 </head>
 <body>
