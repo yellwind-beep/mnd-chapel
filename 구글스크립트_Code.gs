@@ -33,8 +33,44 @@ function doGet() {
     changes: 표읽기_(ss.getSheetByName(탭.변경)),
     gospel: 표읽기_(ss.getSheetByName(탭.복음)),
     notices: 표읽기_(ss.getSheetByName(탭.공지)),
+    jubo: 주보_(),
     updated: new Date().toISOString(),
   });
+}
+
+/* ---------- 군종교구 주보 (최신 PDF) ----------
+ * 군종교구 홈페이지 주보 목록에서 맨 위(최신) 주보의 제목·발행일·PDF 주소를 가져옵니다.
+ * 1시간 동안 저장해 두고 다시 씁니다. 못 가져오면 홈페이지 배너가 숨겨집니다.
+ */
+const 주보_목록 = 'https://www.gunjong.or.kr/parish/weekly.asp';
+
+function 주보_() {
+  const cache = CacheService.getScriptCache();
+  const hit = cache.get('jubo');
+  if (hit) return JSON.parse(hit);
+  try {
+    const res = UrlFetchApp.fetch(주보_목록, { muteHttpExceptions: true, followRedirects: true });
+    if (res.getResponseCode() !== 200) return null;
+    const j = 주보뽑기_(res.getContentText('UTF-8'));
+    if (j) cache.put('jubo', JSON.stringify(j), 3600);
+    return j;
+  } catch (err) {
+    console.warn('주보 불러오기 실패: ' + err.message);
+    return null;
+  }
+}
+
+function 주보뽑기_(html) {
+  // 주소 안의 점(.)이 %2E로 적혀 있어 풀어서 확인합니다
+  const pdf경로 = (t) => [...t.matchAll(/savepath=([^"'&]+)/gi)]
+    .map((m) => { try { return decodeURIComponent(m[1].replace(/\+/g, ' ')); } catch (e) { return ''; } })
+    .find((p) => /\.pdf$/i.test(p));
+  const 줄 = html.split(/<tr[\s>]/i).slice(1).find((t) => pdf경로(t));
+  if (!줄) return null;
+  const 경로 = pdf경로(줄);
+  const 제목 = 글자만_((줄.match(/weekly_detail\.asp[^>]*>([\s\S]*?)<\/a>/i) || [])[1] || '');
+  const 날짜 = (줄.match(/(\d{4}-\d{2}-\d{2})/) || [])[1] || '';
+  return { title: 제목, date: 날짜, pdf: 'https://www.gunjong.or.kr' + encodeURI(경로) };
 }
 
 /* ---------- 상담 신청이 들어올 때 ---------- */
