@@ -133,6 +133,30 @@
   details.notice .photo { display: block; width: 100%; height: auto; border-radius: 10px; margin-bottom: 12px; }
   .more { margin-top: 12px; background: none; border: 1px solid var(--line); border-radius: 10px; padding: 10px; width: 100%; font: inherit; color: var(--muted); cursor: pointer; }
 
+  /* 공지사항: 한 장의 카드 안에 줄로 묶어서 공간을 적게 */
+  .sec-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  .sec-head h2 { margin: 0; }
+  .sec-head .more { margin: 0; width: auto; border: 0; padding: 2px 0; font-size: 13.5px; font-weight: 500; color: var(--gold); }
+  .nlist { margin-top: 10px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; }
+  .nlist .card { border: 0; border-radius: 0; box-shadow: none; background: transparent; }
+  .nlist .notices { gap: 0; }
+  .nlist details.notice.pinned { margin-bottom: 0; background: #fbf6ea; }
+  .nlist details.notice + details.notice,
+  .nlist #pinList:not(:empty) + .notices > :first-child { border-top: 1px solid var(--line); }
+  .nlist .skel { border-radius: 0; height: 46px; }
+  .nlist .skel + .skel { border-top: 1px solid var(--line); }
+
+  /* 오시는 길 · 상담 신청: 맨 아래 두 칸 */
+  .acts { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .act { display: flex; align-items: center; gap: 10px; padding: 12px 14px; min-width: 0; text-decoration: none; color: var(--ink); font: inherit; text-align: left; cursor: pointer; -webkit-tap-highlight-color: transparent; transition: border-color .15s ease; }
+  .act:hover, .act:focus-visible { border-color: var(--gold); }
+  .act .a-ic { flex: none; width: 34px; height: 34px; border-radius: 50%; background: var(--accent-soft); display: flex; align-items: center; justify-content: center; }
+  .act.primary .a-ic { background: var(--accent); }
+  .act .a-txt { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; line-height: 1.35; }
+  .act .a-txt b { font-size: 15.5px; font-weight: 700; }
+  .act .a-txt small { font-size: 12.5px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  #consultBox { margin-top: 12px; }
+
   /* 오시는 길 */
   .btn { display: inline-block; background: var(--accent); color: #fff; text-decoration: none; padding: 10px 16px; border-radius: 10px; font-weight: 500; font-size: 15px; border: 0; cursor: pointer; font-family: inherit; }
   .btn.ghost { background: var(--surface); color: var(--accent); border: 1px solid var(--accent); }
@@ -251,6 +275,14 @@
     .guide .g-ic { width: 30px; height: 30px; }
     .guide .g-txt b { font-size: 15px; }
     .guide .g-txt small { font-size: 12px; margin-top: 1px; }
+    .sec-head h2 { font-size: 16px; }
+    .nlist { margin-top: 6px; }
+    .nlist .skel { height: 40px; }
+    .acts { gap: 8px; }
+    .act { padding: 9px 11px; gap: 8px; }
+    .act .a-ic { width: 30px; height: 30px; }
+    .act .a-txt b { font-size: 14.5px; }
+    .act .a-txt small { font-size: 12px; }
   }
   /* 휴대폰 화면 높이별 단계: 작은 폰(기본·위) → 보통 폰 → 큰 폰 순으로 글자·간격을 넉넉하게 */
   @media (max-width: 480px) and (min-height: 640px) {
@@ -278,6 +310,9 @@
     .way { padding: 11px 14px 11px 16px; }
     .way #mapLink { padding: 7px 11px; }
     .open-row .btn { padding: 9px 16px; font-size: 14.5px; }
+    .sec-head h2 { font-size: 17px; }
+    .nlist { margin-top: 8px; }
+    .act { padding: 11px 12px; }
   }
   @media (max-width: 480px) and (min-height: 740px) {
     body { font-size: 16px; }
@@ -308,6 +343,10 @@
     .way { padding: 13px 16px 13px 18px; }
     .way #mapLink { padding: 8px 12px; font-size: 14px; }
     .open-row .btn { padding: 10px 18px; font-size: 15px; }
+    .sec-head h2 { font-size: 18px; }
+    .nlist { margin-top: 10px; }
+    .act { padding: 12px 14px; gap: 10px; }
+    .act .a-ic { width: 34px; height: 34px; }
   }
 </style>
 </head>
@@ -365,28 +404,24 @@
 
     <div class="sp" aria-hidden="true"></div>
     <section class="block" id="notice">
-      <h2>공지사항</h2>
-      <div id="pinList"></div>
-      <div class="notices" id="noticeList"><div class="skel"></div><div class="skel"></div><div class="skel"></div></div>
-      <button class="more" id="moreBtn" hidden>이전 공지 더 보기</button>
-    </section>
-
-    <div class="sp" aria-hidden="true"></div>
-    <section class="block" id="way">
-      <h2>오시는 길</h2>
-      <div class="card way">
-        <div class="addr" data-info="주소">-</div>
-        <div id="mapWrap" hidden><a class="btn ghost" id="mapLink" target="_blank" rel="noopener">지도에서 보기</a></div>
+      <div class="sec-head"><h2>공지사항</h2><button class="more" id="moreBtn" type="button" hidden>더 보기 ›</button></div>
+      <div class="nlist">
+        <div id="pinList"></div>
+        <div class="notices" id="noticeList"><div class="skel"></div><div class="skel"></div></div>
       </div>
     </section>
 
     <div class="sp" aria-hidden="true"></div>
     <section class="block" id="consult">
-      <div class="consult-head">
-        <h2>상담 신청</h2>
-        <div class="open-row">
-          <button class="btn" type="button" id="openConsult" aria-expanded="false" aria-controls="consultBox">상담 신청서 작성하기</button>
-        </div>
+      <div class="acts">
+        <a class="card act" id="mapLink" href="https://map.naver.com/p/search/%EC%B2%9C%EC%A3%BC%EA%B5%90%20%EA%B5%B0%EC%A2%85%EA%B5%90%EA%B5%AC%EC%B2%AD" target="_blank" rel="noopener" aria-label="오시는 길: 지도에서 보기 (새 창)">
+          <span class="a-ic" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2f4a3a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-6.5-6.1-6.5-11a6.5 6.5 0 0 1 13 0c0 4.9-6.5 11-6.5 11z"/><circle cx="12" cy="10" r="2.4"/></svg></span>
+          <span class="a-txt"><b>오시는 길</b><small class="addr" data-info="주소">군종교구청 1층 경당</small></span>
+        </a>
+        <button class="card act primary" type="button" id="openConsult" aria-expanded="false" aria-controls="consultBox">
+          <span class="a-ic" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f6f3ec" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 5h14v10H10l-4 4v-4H5z"/><path d="M9 9.5h6M9 12h4"/></svg></span>
+          <span class="a-txt"><b>상담 신청</b><small>신부님께 1:1로</small></span>
+        </button>
       </div>
 
       <div class="card" id="consultBox" hidden>
@@ -499,7 +534,7 @@ const SAMPLE = {
 const DAYS = ['일', '월', '화', '수', '목', '금', '토'];
 const DAY_ORDER = [0, 1, 2, 3, 4, 5, 6]; // 주일 먼저
 const CACHE_KEY = 'church-data-v1';
-const NOTICE_PAGE = 5;
+const NOTICE_PAGE = matchMedia('(max-width: 480px)').matches ? 2 : 5;  // 휴대폰은 2개씩
 
 const $ = (s) => document.querySelector(s);
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -605,7 +640,7 @@ function render(data) {
     if (v) el.textContent = v;
   });
   if (info['성당이름']) document.title = info['성당이름'];
-  if (info['지도링크']) { $('#mapLink').href = info['지도링크']; $('#mapWrap').hidden = false; }
+  if (/^https?:\/\//.test(info['지도링크'] || '')) $('#mapLink').href = info['지도링크'];
   fitAddr();
 
   // 미사 시간
@@ -720,10 +755,13 @@ async function load() {
 
 /* 상담 신청 */
 $('#openConsult').addEventListener('click', (ev) => {
-  ev.currentTarget.setAttribute('aria-expanded', 'true');
-  ev.currentTarget.parentElement.hidden = true;
-  $('#consultBox').hidden = false;
-  $('#f-name').focus();
+  const box = $('#consultBox'), open = box.hidden;
+  box.hidden = !open;
+  ev.currentTarget.setAttribute('aria-expanded', String(open));
+  if (open) {
+    box.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    setTimeout(() => { const f = $('#f-name'); if (f) f.focus({ preventScroll: true }); }, 350);
+  }
 });
 
 $('#consultForm').addEventListener('submit', async (ev) => {
