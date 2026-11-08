@@ -277,6 +277,9 @@
     .guide .g-txt small { font-size: 12px; margin-top: 1px; }
     .sec-head h2 { font-size: 16px; }
     .nlist { margin-top: 6px; }
+    .nlist details.notice summary { padding: 8px 13px; }
+    section.block { padding: 5px 0; }
+    .duo .jubo { padding: 8px 10px; gap: 5px; }
     .nlist .skel { height: 40px; }
     .acts { gap: 8px; }
     .act { padding: 9px 11px; gap: 8px; }
@@ -416,7 +419,7 @@
       <div class="acts">
         <a class="card act" id="mapLink" href="https://map.naver.com/p/search/%EC%B2%9C%EC%A3%BC%EA%B5%90%20%EA%B5%B0%EC%A2%85%EA%B5%90%EA%B5%AC%EC%B2%AD" target="_blank" rel="noopener" aria-label="오시는 길: 지도에서 보기 (새 창)">
           <span class="a-ic" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2f4a3a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-6.5-6.1-6.5-11a6.5 6.5 0 0 1 13 0c0 4.9-6.5 11-6.5 11z"/><circle cx="12" cy="10" r="2.4"/></svg></span>
-          <span class="a-txt"><b>오시는 길</b><small class="addr" data-info="주소">군종교구청 1층 경당</small></span>
+          <span class="a-txt"><b>오시는 길</b><small id="wayAddr">군종교구청 1층 경당</small></span>
         </a>
         <button class="card act primary" type="button" id="openConsult" aria-expanded="false" aria-controls="consultBox">
           <span class="a-ic" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f6f3ec" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 5h14v10H10l-4 4v-4H5z"/><path d="M9 9.5h6M9 12h4"/></svg></span>
@@ -641,6 +644,8 @@ function render(data) {
   });
   if (info['성당이름']) document.title = info['성당이름'];
   if (/^https?:\/\//.test(info['지도링크'] || '')) $('#mapLink').href = info['지도링크'];
+  // 칸이 좁아 주소는 건물 이름부터 짧게 (예: '… 앞 군종교구청 1층 경당' → '군종교구청 1층 경당')
+  if (info['주소']) $('#wayAddr').textContent = info['주소'].replace(/^.*\s(?=\S*(교구청|성당|청사|회관|센터))/, '');
   fitAddr();
 
   // 미사 시간
