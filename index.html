@@ -59,6 +59,7 @@
   .next .where { font-family: var(--sans); font-size: 15px; font-weight: 500; opacity: .85; margin-left: 10px; white-space: nowrap; }
   .next .where:empty { display: none; }
   #nextWhen { white-space: nowrap; }
+  .next .where { display: inline-block; }
   .next .when { text-wrap: wrap; }
 
   /* 섹션 공통 */
@@ -422,10 +423,14 @@
     .act { padding: 10px 12px; }
   }
   @media (max-width: 480px) and (min-height: 800px) {
-    .next { padding: 24px 22px; }
-    .next .when { font-size: clamp(23px, 6.8vw, 27px); }
-    .gospel { margin-top: 12px; padding: 20px 20px 22px 21px; }
-    .gospel blockquote { margin-top: 10px; font-size: clamp(19.5px, 5.6vw, 22px); }
+    main > .wrap > .sp { max-height: 14px; }
+    .next { padding: 26px 22px 24px; }
+    .next .label { font-size: 14px; }
+    .next .when { font-size: clamp(24px, 7vw, 28px); margin-top: 4px; }
+    .next .where { font-size: 15.5px; margin-left: 0; margin-top: 2px; display: block; }
+    .gospel { margin-top: 12px; padding: 22px 20px 24px 21px; }
+    .gospel .g-head { font-size: 13.5px; }
+    .gospel blockquote { margin-top: 12px; font-size: clamp(20px, 5.8vw, 23px); }
   }
 </style>
 </head>
