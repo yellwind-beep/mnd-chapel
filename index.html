@@ -115,8 +115,8 @@
   .gospel blockquote { margin: 10px 0 0; font-family: var(--serif); font-size: 18px; line-height: 1.6; color: var(--ink); }
   .gospel .g-link { display: block; color: inherit; text-decoration: none; -webkit-tap-highlight-color: transparent; }
   .gospel .g-link:hover blockquote, .gospel .g-link:focus-visible blockquote { text-decoration: underline; text-decoration-color: var(--gold); text-underline-offset: 4px; }
-  .gospel blockquote::before { content: "“"; }
-  .gospel blockquote::after { content: "”"; }
+  /* 핵심구절: 문장 단위로 묶어서 문장 중간에서 줄이 바뀌지 않게 (문장이 한 줄보다 길 때만 안에서 줄바꿈) */
+  .gospel blockquote .vs { display: inline-block; }
   .gospel p { margin: 0; color: #36403a; font-size: 15px; white-space: pre-line; }
   .next .tag { display: inline-block; margin-left: 6px; background: var(--gold); color: #fff; font-size: 11px; font-weight: 700; padding: 1px 8px; border-radius: 999px; letter-spacing: 0; vertical-align: 1px; }
 
@@ -746,10 +746,11 @@ function render(data) {
     $('#gLabel').textContent = g.d.getTime() === todayKey ? '오늘의 복음' : `${dateLabel(g.d)} 복음`;
     $('#gRef').textContent = g.r['복음'] || '';
     $('#gDay').textContent = g.r['전례'] || '';
-    $('#gVerse').textContent = g.r['핵심구절'];
+    setVerse(g.r['핵심구절']);
     const ymd = `${g.d.getFullYear()}-${String(g.d.getMonth() + 1).padStart(2, '0')}-${String(g.d.getDate()).padStart(2, '0')}`;
     $('#gLink').href = `https://maria.catholic.or.kr/mi_pr/missa/missa.asp?menu=missa&missatype=DA&gomonth=${ymd}`;
     $('#gospel').hidden = false;
+    fitVerse();
   } else {
     $('#gospel').hidden = true;
   }
@@ -896,6 +897,31 @@ function fitAddr() {
     if (bsize > 11) { bsize -= 0.5; btn.style.fontSize = bsize + 'px'; btn.style.padding = '6px 8px'; }
   }
 }
+/* 복음 핵심구절: 문장마다 묶어서 넣기 */
+function setVerse(text) {
+  const t = String(text || '').trim();
+  const parts = (t.match(/[^.?!。]+[.?!。]+["”’]?|[^.?!。]+$/g) || [t]).map((p) => p.trim()).filter(Boolean);
+  const q = $('#gVerse');
+  q.innerHTML = parts.map((p, i) => `<span class="vs">${i === 0 ? '“' : ''}${esc(p)}${i === parts.length - 1 ? '”' : ''}</span>`).join(' ');
+  q.dataset.text = t;
+}
+/* 복음 핵심구절이 3줄을 넘지 않도록 글자 크기·자간 자동 조절 (최소 13px) */
+function fitVerse() {
+  const q = $('#gVerse');
+  if (!q || !q.dataset.text || $('#gospel').hidden) return;
+  q.style.fontSize = ''; q.style.letterSpacing = '';
+  const base = parseFloat(getComputedStyle(q).fontSize);
+  const lines = () => {
+    const lh = parseFloat(getComputedStyle(q).lineHeight) || parseFloat(getComputedStyle(q).fontSize) * 1.5;
+    return Math.round(q.getBoundingClientRect().height / lh);
+  };
+  let size = base, ls = 0;
+  while (lines() > 3 && size > 13) {
+    if (ls > -0.03) { ls -= 0.01; q.style.letterSpacing = ls.toFixed(2) + 'em'; continue; }   // 먼저 자간을 살짝
+    size -= 0.5; q.style.fontSize = size + 'px';                                              // 그래도 넘치면 글자 크기
+  }
+}
+
 /* 공지 제목이 한 줄에 들어가도록 글자 크기 자동 조절 (최소 12px, 그래도 길면 … 처리) */
 function fitTitles() {
   document.querySelectorAll('details.notice summary .t').forEach((el) => {
@@ -907,8 +933,8 @@ function fitTitles() {
     }
   });
 }
-window.addEventListener('resize', () => { fitAddr(); fitTitles(); });
-if (document.fonts) document.fonts.ready.then(() => { fitAddr(); fitTitles(); });
+window.addEventListener('resize', () => { fitAddr(); fitTitles(); fitVerse(); });
+if (document.fonts) document.fonts.ready.then(() => { fitAddr(); fitTitles(); fitVerse(); });
 
 load();
 
