@@ -58,12 +58,6 @@
   .next .when { font-family: var(--serif); font-size: 22px; font-weight: 700; margin-top: 2px; }
   .next .where { font-family: var(--sans); font-size: 15px; font-weight: 500; opacity: .85; margin-left: 10px; white-space: nowrap; }
   .next .where:empty { display: none; }
-  .next-go { flex: none; color: #fff; text-decoration: none; font-size: 13px; font-weight: 700; padding: 7px 12px; border-radius: 999px; background: rgba(255,255,255,.16); border: 1px solid rgba(255,255,255,.32); white-space: nowrap; }
-  .next-go:active { background: rgba(255,255,255,.3); }
-  @media (max-width: 480px) {
-    .next { position: relative; }
-    .next-go { position: absolute; top: 10px; right: 12px; font-size: 12px; padding: 4px 10px; }
-  }
   #nextWhen { white-space: nowrap; }
   .next .where { display: inline-block; }
   .next .when { text-wrap: wrap; }
@@ -464,7 +458,6 @@
           <div class="label" id="nextLabel">다음 미사</div>
           <div class="when"><span id="nextWhen">불러오는 중…</span><span class="where" id="nextWhere"></span></div>
         </div>
-        <a class="next-go" id="nextGo" href="#" hidden>미사 전례문 보기 ›</a>
       </div>
 
       <div class="card gospel" id="gospel" hidden>
@@ -472,7 +465,7 @@
         <a class="g-link" id="gLink" href="https://maria.catholic.or.kr/mi_pr/missa/missa.asp" target="_blank" rel="noopener" aria-label="굿뉴스 매일미사에서 이 날 복음 보기 (새 창)"><blockquote id="gVerse"></blockquote></a>
       </div>
 
-      <a class="card guide" href="https://maria.catholic.or.kr/mi_pr/missa/ordinary.asp" target="_blank" rel="noopener" aria-label="미사가 익숙하지 않아요: 굿뉴스 미사통상문 보기 (새 창)">
+      <a class="card guide" id="guideLink" href="https://maria.catholic.or.kr/mi_pr/missa/ordinary.asp" target="_blank" rel="noopener" aria-label="미사가 익숙하지 않아요: 굿뉴스 미사통상문 보기 (새 창)">
         <span class="g-ic" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2f4a3a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6.5C10.3 5.2 7.8 4.6 4 4.8v13.4c3.8-.2 6.3.4 8 1.8 1.7-1.4 4.2-2 8-1.8V4.8c-3.8-.2-6.3.4-8 1.7z"/><path d="M12 6.5V20"/></svg></span>
         <span class="g-txt"><b>미사가 익숙하지 않아요</b><small>미사 순서와 기도문 차례대로 보기</small></span>
         <span class="chev" aria-hidden="true">›</span>
@@ -831,16 +824,20 @@ function render(data) {
   fitTitles();
 }
 
-// 다음 미사 날짜에 맞는 전례문(/mass/날짜.html)이 있으면 '미사 전례문 보기' 버튼 표시
+// 다음 미사 날짜에 맞는 전례문(/mass/날짜.html)이 있으면 '미사가 익숙하지 않아요'를 그 전례문으로 연결
+// (없으면 원래대로 굿뉴스 미사통상문으로 연결)
 async function showMassText(dt) {
   const key = `${dt.getFullYear()}-${pad2(dt.getMonth() + 1)}-${pad2(dt.getDate())}`;
   try {
     const list = await fetch('/mass/index.json', { cache: 'no-cache' }).then((r) => r.json());
     const m = list.find((x) => x.date === key && /^\/mass\/[\w.-]+\.html$/.test(x.url || ''));
-    const a = $('#nextGo');
-    if (m) { a.href = m.url; a.setAttribute('aria-label', `${m.title} 미사 전례문 보기`); a.hidden = false; }
-    else a.hidden = true;
-  } catch (e) { /* 전례문 목록이 없으면 버튼을 숨긴 채로 둠 */ }
+    if (!m) return;
+    const a = $('#guideLink');
+    a.href = m.url;
+    a.removeAttribute('target');
+    a.removeAttribute('rel');
+    a.setAttribute('aria-label', `미사가 익숙하지 않아요: ${m.title} 미사 순서와 기도문 보기`);
+  } catch (e) { /* 전례문 목록이 없으면 굿뉴스 미사통상문 링크 그대로 */ }
 }
 
 async function load() {
