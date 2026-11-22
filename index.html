@@ -750,7 +750,16 @@ function render(data) {
     $('#gDay').textContent = g.r['전례'] || '';
     setVerse(g.r['핵심구절']);
     const ymd = `${g.d.getFullYear()}-${String(g.d.getMonth() + 1).padStart(2, '0')}-${String(g.d.getDate()).padStart(2, '0')}`;
-    $('#gLink').href = `https://maria.catholic.or.kr/mi_pr/missa/missa.asp?menu=missa&missatype=DA&gomonth=${ymd}`;
+    const gl = $('#gLink');
+    if ((data.massTexts || []).some((x) => x.date === ymd)) {
+      // 시트에 그날 전례문이 있으면 우리 '말씀' 페이지로 (입당송·독서·화답송·복음·영성체송)
+      gl.href = `/word/?d=${ymd}`;
+      gl.removeAttribute('target');
+      gl.removeAttribute('rel');
+      gl.setAttribute('aria-label', '이 날 말씀 전체 보기');
+    } else {
+      gl.href = `https://maria.catholic.or.kr/mi_pr/missa/missa.asp?menu=missa&missatype=DA&gomonth=${ymd}`;
+    }
     $('#gospel').hidden = false;
     fitVerse();
   } else {

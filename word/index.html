@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#2E6B4A">
+<title>오늘의 말씀 · 국방부 성당</title>
+<link rel="icon" href="/icons/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+/* 말씀 전례만 모아 읽는 휴대폰용 페이지: 위쪽 시기 색 띠 → 날짜·전례일 → 붙어 다니는 목차 → 카드로 나눈 말씀 */
+:root{
+  --s1:#2E6B4A; --s2:#1F4D35; --tint:#E9F1EB;          /* 전례 시기 색 (스크립트가 바꿈) */
+  --bg:#F7F5EF; --paper:#FFFEFA; --ink:#1C2420; --sub:#66716B; --line:#E5E1D6;
+  --people:#1E56B8; --people-soft:#E9EFFB; --rub:#B4473B;
+  --fs:18.5px;
+  --serif:"Noto Serif KR","Nanum Myeongjo","Apple Myungjo",serif;
+  --sans:Pretendard,"Pretendard Variable","Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic",system-ui,sans-serif;
+}
+@media (prefers-color-scheme:dark){ :root:not(.light){
+  --bg:#111613; --paper:#18201B; --ink:#E8EEEA; --sub:#9AABA1; --line:#27332C;
+  --people:#8FB8FF; --people-soft:#1A2640; --rub:#F08C7E; --tint:#1E2B23; color-scheme:dark } }
+:root.dark{ --bg:#111613; --paper:#18201B; --ink:#E8EEEA; --sub:#9AABA1; --line:#27332C;
+  --people:#8FB8FF; --people-soft:#1A2640; --rub:#F08C7E; --tint:#1E2B23; color-scheme:dark }
+*{box-sizing:border-box}
+html{scroll-behavior:smooth; -webkit-text-size-adjust:100%}
+body{margin:0; background:var(--bg); color:var(--ink); font-family:var(--sans); font-size:var(--fs); line-height:1.8;
+  word-break:keep-all; overflow-wrap:break-word; -webkit-font-smoothing:antialiased}
+p{margin:0}
+a{color:inherit}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+
+/* 머리 */
+.top{background:linear-gradient(165deg,var(--s1),var(--s2)); color:#F6F8F5;
+  padding:calc(18px + env(safe-area-inset-top)) max(20px,env(safe-area-inset-right)) 26px max(20px,env(safe-area-inset-left))}
+.top .row{display:flex; align-items:center; justify-content:space-between; gap:10px}
+.top .home{font:700 .72em/1 var(--sans); text-decoration:none; opacity:.92; padding:6px 0}
+.tools{display:flex; gap:6px}
+.tools button{font:700 .7em/1 var(--sans); color:#fff; background:rgba(255,255,255,.14); border:1px solid rgba(255,255,255,.28);
+  border-radius:99px; padding:7px 11px; cursor:pointer}
+.tools button:active{background:rgba(255,255,255,.3)}
+.tools button:focus-visible,.nav a:focus-visible,.full:focus-visible{outline:2px solid #fff; outline-offset:2px}
+.top .date{margin-top:18px; font-size:.76em; opacity:.85; letter-spacing:.03em}
+.top h1{margin:4px 0 0; font:700 1.42em/1.32 var(--serif); letter-spacing:-.01em; text-wrap:balance}
+.top .season{display:inline-flex; align-items:center; gap:7px; margin-top:12px; font-size:.7em; font-weight:600;
+  background:rgba(255,255,255,.15); padding:4px 11px; border-radius:99px}
+.top .season i{width:8px; height:8px; border-radius:50%; background:var(--dot,#A6E3BC)}
+
+/* 목차 */
+.nav{position:sticky; top:0; z-index:10; background:color-mix(in srgb,var(--bg) 90%,transparent);
+  -webkit-backdrop-filter:blur(10px); backdrop-filter:blur(10px); border-bottom:1px solid var(--line)}
+.nav .row{display:flex; gap:6px; overflow-x:auto; scrollbar-width:none;
+  padding:9px max(14px,env(safe-area-inset-right)) 9px max(14px,env(safe-area-inset-left))}
+.nav .row::-webkit-scrollbar{display:none}
+.nav a{flex:none; text-decoration:none; font-size:.74em; font-weight:700; color:var(--sub);
+  padding:6px 12px; border-radius:99px; border:1px solid var(--line); background:var(--paper)}
+.nav a.on{background:var(--s1); border-color:var(--s1); color:#fff}
+
+main{max-width:640px; margin:0 auto; padding:6px max(16px,env(safe-area-inset-right)) 110px max(16px,env(safe-area-inset-left))}
+.state{margin-top:24px; padding:14px 16px; border-radius:14px; background:var(--paper); border:1px solid var(--line); color:var(--sub); font-size:.86em}
+.state:empty{display:none}
+
+/* 말씀 카드 */
+.sec{scroll-margin-top:58px; margin-top:22px}
+.label{display:flex; align-items:baseline; justify-content:space-between; gap:12px; margin:0 4px 8px}
+.label h2{margin:0; font-size:.78em; font-weight:800; letter-spacing:.12em; color:var(--s1)}
+:root.dark .label h2{color:var(--sub)}
+@media (prefers-color-scheme:dark){:root:not(.light) .label h2{color:var(--sub)}}
+.label .ref{font-size:.72em; color:var(--sub); font-weight:600; text-align:right}
+.card{background:var(--paper); border:1px solid var(--line); border-radius:20px; padding:20px 20px 22px}
+.title{font:600 .9em/1.6 var(--serif); color:var(--s1); background:var(--tint); border-radius:12px; padding:10px 14px; margin-bottom:14px}
+:root.dark .title{color:var(--ink)}
+@media (prefers-color-scheme:dark){:root:not(.light) .title{color:var(--ink)}}
+.body{font-family:var(--serif); font-weight:500; line-height:1.9}
+.body p+p{margin-top:.1em}
+.ant{font:500 1em/1.85 var(--serif)}
+.end{margin-top:14px; padding-top:12px; border-top:1px dashed var(--line); font-size:.84em; color:var(--sub)}
+.end b{color:var(--people); font-weight:700}
+
+/* 화답송 */
+.resp{font:700 1em/1.7 var(--serif); color:var(--people); background:var(--people-soft); border-radius:12px; padding:11px 14px}
+.resp small{display:block; font:700 .62em/1.4 var(--sans); letter-spacing:.12em; color:var(--sub); margin-bottom:2px}
+.st{font-family:var(--serif); font-weight:500; line-height:1.9; padding-top:14px; margin-top:14px; border-top:1px dashed var(--line)}
+.st .r{margin-top:6px; color:var(--people); font-weight:700; font-size:.92em}
+
+/* 복음 */
+.gospel .card{border:none; background:var(--paper); box-shadow:0 0 0 1.5px var(--s1) inset, 0 10px 28px rgba(0,0,0,.06)}
+.gospel .label h2::before{content:"✠ "}
+.acc{font:700 .9em/1.7 var(--serif); color:var(--people); margin-bottom:12px}
+
+/* 영성체송 */
+.cs+.cs{margin-top:14px; padding-top:14px; border-top:1px dashed var(--line)}
+.cs .src{font-size:.72em; color:var(--sub); font-weight:600; margin-bottom:4px}
+.or{display:block; text-align:center; font-size:.7em; letter-spacing:.3em; color:var(--sub); margin:12px 0 0}
+
+.full{display:flex; align-items:center; justify-content:space-between; gap:10px; margin-top:28px; padding:16px 18px; border-radius:16px;
+  background:var(--tint); color:var(--ink); text-decoration:none; font-weight:700; font-size:.88em}
+.full small{display:block; font-weight:500; color:var(--sub); font-size:.86em}
+.full span:last-child{color:var(--s1); font-size:1.3em}
+#up{position:fixed; right:max(14px,env(safe-area-inset-right)); bottom:calc(16px + env(safe-area-inset-bottom)); width:42px; height:42px;
+  border-radius:50%; border:1px solid var(--line); background:var(--paper); color:var(--ink); font:700 15px/1 var(--sans);
+  box-shadow:0 4px 14px rgba(0,0,0,.12); opacity:0; pointer-events:none; transition:opacity .2s; cursor:pointer}
+#up.show{opacity:1; pointer-events:auto}
+main.wait .sec,main.wait .full{display:none}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="row">
+    <a class="home" href="/">‹ 국방부 성당</a>
+    <div class="tools"><button id="dec" aria-label="글자 작게">가−</button><button id="inc" aria-label="글자 크게">가+</button><button id="mode" aria-label="화면 밝기 바꾸기">어둡게</button></div>
+  </div>
+  <p class="date" id="wDate">&nbsp;</p>
+  <h1 id="wTitle">오늘의 말씀</h1>
+  <span class="season"><i></i><span id="wSeason">불러오는 중…</span></span>
+</header>
+<nav class="nav" aria-label="말씀 목차"><div class="row" id="navRow"></div></nav>
+<main class="wait">
+  <p class="state" id="wState">말씀을 불러오는 중입니다…</p>
+  <div id="wBody"></div>
+  <a class="full" id="wFull" href="/mass/"><span>미사 전체 순서 보기<small>기도문과 응답까지 차례대로</small></span><span>›</span></a>
+</main>
+<button id="up" aria-label="맨 위로">↑</button>
+
+<script>
+(function(){
+var API='https://script.google.com/macros/s/AKfycbx-gFHU_phfT2KEgMIQEc4lPIZOSdz-cL_owQ6GxwQPAzwPcaYzNXo9fV_eUXAQ2n99/exec';
+var DAYS=['일','월','화','수','목','금','토'];
+var COLORS={'녹색':['#2E6B4A','#1F4D35','#E9F1EB','#A6E3BC'],'자색':['#5A3F7D','#3B2856','#F0EAF7','#D6C2F2'],
+  '백색':['#8C7440','#5E4C27','#F6F0E2','#FFF1CF'],'홍색':['#9B2F2F','#6B1E1E','#F8E9E7','#FFB8AE'],'장미색':['#B0607A','#7E3F55','#F9EAF0','#FFD3E0']};
+var root=document.documentElement;
+
+/* 글자 크기·밝기 (전례문 페이지와 같은 설정을 함께 씀) */
+function get(k){try{return localStorage.getItem(k)}catch(e){return null}}
+function put(k,v){try{localStorage.setItem(k,v)}catch(e){}}
+var fs=parseFloat(get('word-fs')||'18.5'); if(!(fs>=14&&fs<=28)) fs=18.5;
+function applyFs(){root.style.setProperty('--fs',fs+'px')} applyFs();
+document.getElementById('inc').onclick=function(){fs=Math.min(28,fs+1.5);applyFs();put('word-fs',fs)};
+document.getElementById('dec').onclick=function(){fs=Math.max(14,fs-1.5);applyFs();put('word-fs',fs)};
+var m0=get('mass-mode'); if(m0) root.classList.add(m0);
+var mb=document.getElementById('mode');
+function isDark(){return root.classList.contains('dark')||(!root.classList.contains('light')&&matchMedia('(prefers-color-scheme:dark)').matches)}
+function label(){mb.textContent=isDark()?'밝게':'어둡게'} label();
+mb.onclick=function(){var n=isDark()?'light':'dark'; root.classList.remove('dark','light'); root.classList.add(n); put('mass-mode',n); label();};
+
+function esc(t){return String(t).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function lines(t){return String(t||'').split('\n').map(function(x){return x.trim()}).filter(Boolean)}
+function blocks(t){return String(t||'').split(/\n\s*\n/).map(lines).filter(function(b){return b.length})}
+function paras(t){return lines(t).map(function(p){return '<p>'+esc(p)+'</p>'}).join('')}
+function sec(id,name,ref,inner,cls){return '<section class="sec'+(cls?' '+cls:'')+'" id="'+id+'"><div class="label"><h2>'+esc(name)+'</h2>'+(ref?'<span class="ref">'+esc(ref)+'</span>':'')+'</div><div class="card">'+inner+'</div></section>'}
+function evangelist(ref){var m=String(ref||'').trim(); if(/^마태/.test(m)) return '마태오가'; if(/^마르/.test(m)) return '마르코가'; if(/^루카/.test(m)) return '루카가'; if(/^요한/.test(m)) return '요한이'; return '';}
+
+function render(d){
+  var c=COLORS[d['시기 색']]||COLORS['녹색'];
+  root.style.setProperty('--s1',c[0]); root.style.setProperty('--s2',c[1]); root.style.setProperty('--tint',c[2]); root.style.setProperty('--dot',c[3]);
+  document.querySelector('meta[name=theme-color]').setAttribute('content',c[0]);
+  var m=String(d.date).match(/(\d+)-(\d+)-(\d+)/), dt=new Date(+m[1],m[2]-1,+m[3]);
+  document.getElementById('wDate').textContent=m[1]+'년 '+(+m[2])+'월 '+(+m[3])+'일 '+DAYS[dt.getDay()]+'요일';
+  document.getElementById('wTitle').textContent=d['전례일']||'오늘의 말씀';
+  var col=COLORS[d['시기 색']]?d['시기 색']:'녹색', sn=(String(d['전례일']||'').match(/대림|성탄|사순|부활|연중/)||[])[0];
+  document.getElementById('wSeason').textContent=(sn?sn+' 시기 · ':'')+col;
+  document.title=(d['전례일']||'오늘의 말씀')+' · 말씀';
+  var h='', nav=[];
+  if(d['입당송']){ h+=sec('w-in','입당송',d['입당송 출처'],'<p class="ant">'+esc(d['입당송'])+'</p>'); nav.push(['w-in','입당송']); }
+  var reading=function(id,name,ref,title,body){ if(!lines(body).length) return '';
+    nav.push([id,name]);
+    return sec(id,name,ref,(title?'<p class="title">'+esc(title)+'</p>':'')+'<div class="body">'+paras(body)+'</div>'+
+      '<p class="end">주님의 말씀입니다. <b>◎ 하느님, 감사합니다.</b></p>'); };
+  h+=reading('w-r1','제1독서',d['제1독서 출처'],d['제1독서 소제목'],d['제1독서 본문']);
+  var st=blocks(d['화답송 본문']), rf=String(d['화답송 후렴']||'').trim();
+  if(st.length||rf){ nav.push(['w-ps','화답송']);
+    h+=sec('w-ps','화답송',d['화답송 출처'],(rf?'<p class="resp"><small>후렴</small>'+esc(rf)+'</p>':'')+
+      st.map(function(b){return '<div class="st">'+b.map(function(p){return '<p>'+esc(p)+'</p>'}).join('')+(rf?'<p class="r">◎ '+esc(rf)+'</p>':'')+'</div>'}).join('')); }
+  h+=reading('w-r2','제2독서',d['제2독서 출처'],d['제2독서 소제목'],d['제2독서 본문']);
+  if(lines(d['복음 본문']).length){ nav.push(['w-gs','복음']); var ev=evangelist(d['복음 출처']);
+    h+=sec('w-gs','복음',d['복음 출처'],(ev?'<p class="acc" style="color:var(--sub);font-weight:600">'+esc(ev)+' 전한 거룩한 복음입니다.</p>':'')+
+      (d['복음 소제목']?'<p class="title">'+esc(d['복음 소제목'])+'</p>':'')+'<div class="body">'+paras(d['복음 본문'])+'</div>'+
+      '<p class="end">주님의 말씀입니다. <b>◎ 그리스도님, 찬미합니다.</b></p>','gospel'); }
+  var cs=blocks(d['영성체송']);
+  if(cs.length){ nav.push(['w-cs','영성체송']);
+    h+=sec('w-cs','영성체송','',cs.map(function(b){var src=b.length>1?b[0]:'', tx=b.length>1?b.slice(1).join(' '):b[0];
+      return '<div class="cs">'+(src?'<p class="src">'+esc(src)+'</p>':'')+'<p class="ant">'+esc(tx)+'</p></div>'}).join('<span class="or">또는</span>')); }
+  document.getElementById('wBody').innerHTML=h;
+  document.getElementById('navRow').innerHTML=nav.map(function(n){return '<a href="#'+n[0]+'" data-t="'+n[0]+'">'+n[1]+'</a>'}).join('');
+  document.getElementById('wFull').href='/mass/?d='+d.date;
+  document.querySelector('main').classList.remove('wait');
+  document.getElementById('wState').textContent='';
+  onScroll();
+}
+function fail(msg){document.getElementById('wState').textContent=msg; document.getElementById('wSeason').textContent='';}
+
+/* 스크롤: 지금 읽는 부분 표시, 맨 위로 버튼 */
+var up=document.getElementById('up');
+up.onclick=function(){scrollTo({top:0,behavior:'smooth'})};
+function onScroll(){
+  up.classList.toggle('show',scrollY>500);
+  var links=[].slice.call(document.querySelectorAll('.nav a')), cur=0;
+  links.forEach(function(a,i){var el=document.getElementById(a.dataset.t); if(el && el.getBoundingClientRect().top<120) cur=i;});
+  links.forEach(function(a,i){var on=i===cur; if(on!==a.classList.contains('on')){a.classList.toggle('on',on); if(on) a.scrollIntoView({block:'nearest',inline:'center'});}});
+}
+addEventListener('scroll',onScroll,{passive:true});
+
+/* 날짜: ?d=2026-11-23, 없으면 오늘 */
+var p=function(n){return String(n).padStart(2,'0')}, now=new Date();
+var q=(location.search.match(/[?&]d=(\d{4}-\d{2}-\d{2})/)||[])[1]||(now.getFullYear()+'-'+p(now.getMonth()+1)+'-'+p(now.getDate()));
+var KEY='mass-'+q, saved=null;
+try{ saved=JSON.parse(localStorage.getItem(KEY)||'null'); }catch(e){}
+if(saved) render(saved);
+fetch(API+'?mass='+q+'&t='+Date.now()).then(function(r){return r.json()}).then(function(j){
+  if(j && j.mass){ render(j.mass); put(KEY,JSON.stringify(j.mass)); }
+  else if(!saved) fail('이 날짜의 말씀이 아직 올라오지 않았습니다.');
+}).catch(function(){ if(!saved) fail('인터넷에 연결되지 않아 말씀을 불러오지 못했습니다. 연결된 뒤 다시 열어 주세요.'); });
+})();
+</script>
+</body>
+</html>
