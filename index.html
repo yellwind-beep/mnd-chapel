@@ -788,7 +788,7 @@ function render(data) {
     $('#nextLabel').innerHTML = nx.changed ? '다음 미사 <span class="tag">요일 변경</span>' : '다음 미사';
     $('#nextWhen').textContent = `${rel} ${pad2(nx.dt.getHours())}:${pad2(nx.dt.getMinutes())}`;
     $('#nextWhere').textContent = nx.place;
-    showMassText(nx.dt);
+    showMassText(nx.dt, data.massTexts);
   } else {
     $('#nextLabel').textContent = '다음 미사';
     $('#nextWhen').textContent = '시간표를 확인해 주세요';
@@ -824,20 +824,26 @@ function render(data) {
   fitTitles();
 }
 
-// 다음 미사 날짜에 맞는 전례문(/mass/날짜.html)이 있으면 '미사가 익숙하지 않아요'를 그 전례문으로 연결
-// (없으면 원래대로 굿뉴스 미사통상문으로 연결)
-async function showMassText(dt) {
+// 다음 미사 날짜에 맞는 전례문이 있으면 '미사가 익숙하지 않아요'를 그 전례문으로 연결
+// - 구글 시트 '전례문 …' 탭에 넣은 것: /mass/?d=날짜
+// - 따로 올린 파일(/mass/index.json 목록)
+// (둘 다 없으면 원래대로 굿뉴스 미사통상문으로 연결)
+async function showMassText(dt, fromSheet) {
   const key = `${dt.getFullYear()}-${pad2(dt.getMonth() + 1)}-${pad2(dt.getDate())}`;
-  try {
-    const list = await fetch('/mass/index.json', { cache: 'no-cache' }).then((r) => r.json());
-    const m = list.find((x) => x.date === key && /^\/mass\/[\w.-]+\.html$/.test(x.url || ''));
-    if (!m) return;
-    const a = $('#guideLink');
-    a.href = m.url;
-    a.removeAttribute('target');
-    a.removeAttribute('rel');
-    a.setAttribute('aria-label', `미사가 익숙하지 않아요: ${m.title} 미사 순서와 기도문 보기`);
-  } catch (e) { /* 전례문 목록이 없으면 굿뉴스 미사통상문 링크 그대로 */ }
+  let m = (fromSheet || []).find((x) => x.date === key);
+  if (m) m = { title: m.title, url: '/mass/?d=' + key };
+  if (!m) {
+    try {
+      const list = await fetch('/mass/index.json', { cache: 'no-cache' }).then((r) => r.json());
+      m = list.find((x) => x.date === key && /^\/mass\/[\w.-]+\.html$/.test(x.url || ''));
+    } catch (e) { /* 목록이 없으면 굿뉴스 링크 그대로 */ }
+  }
+  if (!m) return;
+  const a = $('#guideLink');
+  a.href = m.url;
+  a.removeAttribute('target');
+  a.removeAttribute('rel');
+  a.setAttribute('aria-label', `미사가 익숙하지 않아요: ${m.title} 미사 순서와 기도문 보기`);
 }
 
 async function load() {

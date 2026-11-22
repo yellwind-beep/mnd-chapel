@@ -25,8 +25,11 @@ const 탭 = {
 const 상담_머리글 = ['접수일시', '접수번호', '이름(세례명)', '소속', '연락방법', '상담분야', '상담방식', '편한시간', '내용', '처리상태', '메모'];
 
 /* ---------- 홈페이지가 내용을 읽어갈 때 ---------- */
-function doGet() {
+function doGet(e) {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
+  // 전례문 한 개: ?mass=2026-11-26
+  const 요청날짜 = e && e.parameter && e.parameter.mass;
+  if (요청날짜) return json_({ mass: 전례문_(ss, 요청날짜) });
   return json_({
     info: 키값읽기_(ss.getSheetByName(탭.정보)),
     masses: 표읽기_(ss.getSheetByName(탭.미사)),
@@ -35,8 +38,48 @@ function doGet() {
     notices: 표읽기_(ss.getSheetByName(탭.공지)),
     jubo: 주보_(),
     bishop: 동정_(),
+    massTexts: 전례문목록_(ss),
     updated: new Date().toISOString(),
   });
+}
+
+/* ---------- 미사 전례문 ----------
+ * '전례문 양식' 탭을 복사해 탭 이름을 '전례문 1126'처럼 '전례문 '으로 시작하게 바꾸고
+ * 날짜와 기도문·독서·복음을 채우면 홈페이지에 그날 전례문이 나타납니다.
+ * (A열: 항목, B열: 내용. '전례문 양식' 탭 자체는 홈페이지에 나오지 않습니다)
+ */
+const 전례문_양식 = '전례문 양식';
+
+function 전례문탭들_(ss) {
+  return ss.getSheets().filter((sh) => /^전례문\s/.test(sh.getName()) && sh.getName() !== 전례문_양식);
+}
+
+function 전례문읽기_(sh) {
+  const n = sh.getLastRow();
+  if (n < 2) return null;
+  const o = {};
+  sh.getRange(1, 1, n, 2).getDisplayValues().forEach((r) => {
+    const k = String(r[0]).trim();
+    if (k && k !== '항목') o[k] = String(r[1]).replace(/\r\n?/g, '\n').trim();
+  });
+  const d = String(o['날짜'] || '').match(/(\d{4})\D+(\d{1,2})\D+(\d{1,2})/);
+  if (!d) return null;
+  o.date = d[1] + '-' + ('0' + d[2]).slice(-2) + '-' + ('0' + d[3]).slice(-2);
+  return o;
+}
+
+function 전례문목록_(ss) {
+  return 전례문탭들_(ss).map(전례문읽기_).filter((o) => o && o['전례일'])
+    .map((o) => ({ date: o.date, title: o['전례일'] }));
+}
+
+function 전례문_(ss, 날짜) {
+  const 찾기 = String(날짜).trim();
+  for (const sh of 전례문탭들_(ss)) {
+    const o = 전례문읽기_(sh);
+    if (o && o.date === 찾기) return o;
+  }
+  return null;
 }
 
 /* ---------- 군종교구 주보 (최신 PDF) ----------

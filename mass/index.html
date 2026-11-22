@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#2E6B4A">
+<title>미사 전례문 · 국방부 성당</title>
+<style>
+:root{
+  --bg:#F6F4EC; --paper:#FFFDF7; --ink:#1E2722; --sub:#5E6B63; --line:#E3E0D3;
+  --green:#2E6B4A; --green-2:#3F8A60; --green-soft:#E6F0E8; --gold:#B08431;
+  --people:#1E56B8; --people-soft:#E7EEFB; --rub:#B4473B; --blue:#2F5F8F;
+  --fs:18px;
+}
+@media (prefers-color-scheme:dark){ :root:not(.light){ --bg:#101814; --paper:#16211B; --ink:#E7EEE9; --sub:#9DB0A4; --line:#26352C;
+  --green:#5FB585; --green-2:#7CCB9F; --green-soft:#1C2E23; --gold:#D9B060; --people:#8FB8FF; --people-soft:#1A2640; --rub:#F08C7E; --blue:#8DB8E8; } }
+:root.dark{ --bg:#101814; --paper:#16211B; --ink:#E7EEE9; --sub:#9DB0A4; --line:#26352C;
+  --green:#5FB585; --green-2:#7CCB9F; --green-soft:#1C2E23; --gold:#D9B060; --people:#8FB8FF; --people-soft:#1A2640; --rub:#F08C7E; --blue:#8DB8E8; }
+*{box-sizing:border-box}
+html{scroll-behavior:smooth; -webkit-text-size-adjust:100%}
+body{margin:0; background:var(--bg); color:var(--ink); font-family:Pretendard,"Pretendard Variable","Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic",system-ui,sans-serif;
+  font-size:var(--fs); line-height:1.75; word-break:keep-all; overflow-wrap:break-word; -webkit-font-smoothing:antialiased}
+p{margin:0}
+/* hero */
+.hero{background:linear-gradient(160deg,var(--h1,#2E6B4A) 0%,var(--h2,#1F4D35) 100%); color:#F4F8F3; padding:calc(28px + env(safe-area-inset-top)) 22px 30px; position:relative; overflow:hidden}
+.hero svg{position:absolute; right:-18px; bottom:-20px; opacity:.22}
+.hero .home{display:inline-block; color:#F4F8F3; text-decoration:none; font-size:.74em; font-weight:700; opacity:.9; margin-bottom:10px}
+.hero .date{font-size:.78em; letter-spacing:.04em; opacity:.85}
+.hero h1{margin:6px 0 4px; font-size:1.55em; line-height:1.3; font-weight:800}
+.hero .season{display:inline-flex; align-items:center; gap:6px; margin-top:8px; font-size:.74em; background:rgba(255,255,255,.14); padding:4px 11px; border-radius:99px}
+.hero .season i{width:9px;height:9px;border-radius:50%;background:var(--dot,#9BE0B4);display:inline-block}
+.legend{display:flex; flex-wrap:wrap; gap:6px 14px; margin-top:14px; font-size:.72em; opacity:.92}
+.legend b{font-weight:700}
+.ctl{display:flex; align-items:center; gap:6px; margin-top:16px; font-size:.72em}
+.ctl span{opacity:.8; margin-right:2px}
+.ctl button{font:700 1em/1 inherit; color:#fff; background:rgba(255,255,255,.14); border:1px solid rgba(255,255,255,.28); border-radius:99px; padding:7px 13px; cursor:pointer}
+.ctl button:active{background:rgba(255,255,255,.28)}
+/* nav */
+.nav{position:sticky; top:0; z-index:10; background:color-mix(in srgb,var(--bg) 92%,transparent); backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px); border-bottom:1px solid var(--line)}
+.nav .row{display:flex; gap:8px; overflow-x:auto; padding:10px 14px; scrollbar-width:none}
+.nav .row::-webkit-scrollbar{display:none}
+.nav a{flex:none; text-decoration:none; color:var(--sub); font-size:.78em; font-weight:600; padding:6px 13px; border-radius:99px; border:1px solid var(--line); background:var(--paper)}
+.nav a.on{background:var(--green); border-color:var(--green); color:#fff}
+.prog{height:3px; background:var(--green-2); width:0; transition:width .1s}
+main{max-width:680px; margin:0 auto; padding:8px 18px 120px}
+.part{scroll-margin-top:60px}
+.part-h{display:flex; align-items:center; gap:12px; margin:40px 0 6px; font-size:.82em; color:var(--green); letter-spacing:.08em; font-weight:800}
+.part-h::after{content:""; flex:1; height:1px; background:linear-gradient(90deg,var(--green-2),transparent)}
+.h{margin:30px 0 10px; font-size:1.08em; font-weight:800; display:flex; flex-direction:column; scroll-margin-top:60px}
+.h small{font-size:.72em; font-weight:500; color:var(--sub); margin-top:2px}
+.blk{margin:0 0 14px}
+.ln{display:flex; gap:.5em; padding:1px 0}
+.ln .mk{flex:none; width:1.05em; text-align:center; font-weight:700}
+.ln.p .mk{color:var(--rub)}
+.ln.r{color:var(--people); font-weight:700}
+.ln.n .mk{color:var(--sub)}
+.ln.b{color:var(--blue); font-weight:600}
+.ln.c{padding-top:0}
+.ln.q{padding-left:1.55em; font-weight:700}
+.blk > .ln:not(.c) + .ln:not(.c){margin-top:6px}
+.rub{color:var(--rub); font-size:.8em; margin:4px 0 4px 1.55em}
+/* readings */
+.rd,.ps,.al,.csw,.voc{background:var(--paper); border:1px solid var(--line); border-radius:18px; padding:18px 18px 20px; margin:0 0 14px; box-shadow:0 1px 0 rgba(0,0,0,.02)}
+.rd-top{display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:10px}
+.tag{font-size:.7em; font-weight:800; color:#fff; background:var(--green); padding:3px 10px; border-radius:99px}
+.rd.gs .tag{background:var(--gold)}
+.ref{font-size:.76em; color:var(--sub); font-weight:600; text-align:right}
+.rd-title{font-size:.86em; color:var(--green); font-weight:700; padding:8px 12px; background:var(--green-soft); border-radius:10px; margin-bottom:12px}
+.rd.gs .rd-title{color:var(--gold); background:color-mix(in srgb,var(--gold) 12%,transparent)}
+.rd-body p{margin:0 0 .15em}
+.ps-resp{font-weight:800; color:var(--people); padding:10px 12px; background:var(--people-soft); border-radius:10px}
+.ps-resp span{display:block; font-size:.66em; letter-spacing:.1em; color:var(--sub); font-weight:700}
+.pv{padding:14px 0 0; border-top:1px dashed var(--line); margin-top:14px}
+.pv .pr{color:var(--people); font-weight:700; margin-top:6px; font-size:.92em}
+.al-a{color:var(--people); font-weight:800}
+.al-v{margin:8px 0; padding-left:1.55em}
+.cs-src{font-size:.74em; color:var(--sub); font-weight:600}
+.cs-tx{font-weight:700; color:var(--people)}
+.or{text-align:center; font-size:.74em; color:var(--sub); margin:10px 0; letter-spacing:.2em}
+.voc .credit{font-size:.7em; color:var(--sub); margin-top:10px; text-align:right}
+.voc .ln{margin-top:8px}
+.fin{text-align:center; margin:46px 0 0; color:var(--green); font-weight:800}
+.fin small{display:block; color:var(--sub); font-weight:500; font-size:.72em; margin-top:4px}
+/* tools */
+.tools{position:fixed; right:14px; bottom:calc(16px + env(safe-area-inset-bottom)); display:flex; flex-direction:column; gap:8px; z-index:20}
+.tools button{width:42px; height:42px; border-radius:50%; border:1px solid var(--line); background:var(--paper); color:var(--ink); font:700 15px/1 inherit; box-shadow:0 4px 14px rgba(0,0,0,.12); cursor:pointer}
+.tools button:active{transform:scale(.94)}
+.state{margin:28px 0 0; padding:14px 16px; border-radius:14px; background:var(--paper); border:1px solid var(--line); color:var(--sub); font-size:.86em}
+.state:empty{display:none}
+main.wait .part{display:none}
+#top{opacity:0; pointer-events:none; transition:opacity .2s}
+#top.show{opacity:1; pointer-events:auto}
+</style>
+</head>
+<body>
+<header class="hero">
+<svg width="170" height="170" viewBox="0 0 100 100" aria-hidden="true"><path d="M50 8 C62 26 78 34 78 56 C78 74 64 88 50 92 C36 88 22 74 22 56 C22 34 38 26 50 8Z" fill="#fff"/><path d="M50 30 V92" stroke="var(--h1,#2E6B4A)" stroke-width="3"/><path d="M50 52 L36 42 M50 66 L64 54 M50 78 L38 70" stroke="var(--h1,#2E6B4A)" stroke-width="2.4" stroke-linecap="round"/></svg>
+<a class="home" href="/">‹ 국방부 성당</a>
+<p class="date" id="mDate">&nbsp;</p>
+<h1 id="mTitle">미사 전례문</h1>
+<span class="season" id="mSeason"><i></i><b id="mSeasonTx">불러오는 중…</b></span>
+<div class="legend"><span><b>✛</b> 사제</span><span><b>◎</b> 교우</span><span><b>○</b> 독서자·선창</span></div>
+<div class="ctl"><span>글자</span><button id="dec" aria-label="글자 작게">가−</button><button id="inc" aria-label="글자 크게">가+</button><button id="mode" aria-label="화면 밝기 바꾸기">어둡게</button></div>
+</header>
+<nav class="nav"><div class="row"><a href="#start" data-t="start">시작 예식</a><a href="#word" data-t="word">말씀 전례</a><a href="#euch" data-t="euch">성찬 전례</a><a href="#comm" data-t="comm">영성체 예식</a><a href="#end" data-t="end">마침 예식</a></div><div class="prog" id="prog"></div></nav>
+<main class="wait">
+<p class="state" id="mState">전례문을 불러오는 중입니다…</p>
+<section class="part" id="start"><h2 class="part-h"><span>시작 예식</span></h2>
+<div id="v-in"></div>
+<h3 class="h">인사</h3>
+<div class="blk"><p class="ln p"><span class="mk">✛</span><span class="tx">성부와 성자와 성령의 이름으로</span></p><p class="ln r"><span class="mk">◎</span><span class="tx">아멘.</span></p><p class="ln p"><span class="mk">✛</span><span class="tx">주님께서 여러분과 함께.</span></p><p class="ln r"><span class="mk">◎</span><span class="tx">또한 사제의 영과 함께.</span></p></div>
+<h3 class="h">참회</h3>
+<div class="blk"><p class="ln p"><span class="mk">✛</span><span class="tx">구원의 신비를 합당하게 거행하기 위하여</span></p><p class="ln p c"><span class="mk"></span><span class="tx">우리 죄를 반성합시다.</span></p></div>
+<div class="blk"><p class="ln r"><span class="mk">◎</span><span class="tx">전능하신 하느님과 형제들에게 고백하오니,</span></p><p class="ln r c"><span class="mk"></span><span class="tx">생각과 말과 행위로 죄를 많이 지었으며,</span></p><p class="ln r c"><span class="mk"></span><span class="tx">자주 의무를 소홀히 하였나이다.</span></p><p class="rub">가슴을 세 번 치며</p><p class="ln r c"><span class="mk"></span><span class="tx">제 탓이요, 제 탓이요, 저의 큰 탓이옵니다.</span></p><p class="ln r c"><span class="mk"></span><span class="tx">그러므로 간절히 바라오니,</span></p><p class="ln r c"><span class="mk"></span><span class="tx">평생 동정이신 성모 마리아와</span></p><p class="ln r c"><span class="mk"></span><span class="tx">모든 천사와 성인과 형제들은</span></p><p class="ln r c"><span class="mk"></span><span class="tx">저를 위하여 하느님께 빌어 주소서.</span></p></div>
+<div class="blk"><p class="ln p"><span class="mk">✛</span><span class="tx">전능하신 하느님, 저희에게 자비를 베푸시어</span></p><p class="ln p c"><span class="mk"></span><span class="tx">죄를 용서하시고, 영원한 생명으로 이끌어 주소서.</span></p><p class="ln r"><span class="mk">◎</span><span class="tx">아멘.</span></p></div>
+<h3 class="h">자비송</h3>
+<div class="blk"><p class="ln p"><span class="mk">✛</span><span class="tx">주님, 자비를 베푸소서.</span></p><p class="ln r"><span class="mk">◎</span><span class="tx">주님, 자비를 베푸소서.</span></p><p class="ln p"><span class="mk">✛</span><span class="tx">그리스도님, 자비를 베푸소서.</span></p><p class="ln r"><span class="mk">◎</span><span class="tx">그리스도님, 자비를 베푸소서.</span></p><p class="ln p"><span class="mk">✛</span><span class="tx">주님, 자비를 베푸소서.</span></p><p class="ln r"><span class="mk">◎</span><span class="tx">주님, 자비를 베푸소서.</span></p></div>
+<div id="v-gloria"></div>
+<div id="v-collect"></div>
+</section>
+<section class="part" id="word"><h2 class="part-h"><span>말씀 전례</span></h2>
+<div id="v-word"></div>
+<h3 class="h">강론</h3>
+<div class="blk"><p class="rub">강론 후 잠시 묵상한다.</p></div>
+<div id="v-creed"></div>
+<div id="v-pof"></div>
+</section>
+<section class="part" id="euch"><h2 class="part-h"><span>성찬 전례</span></h2>
+<h3 class="h">예물 준비 기도</h3>
+<div class="blk"><p class="ln p"><span class="mk">✛</span><span class="tx">온 누리의 주 하느님, 찬미받으소서.</span></p><p class="ln p c"><span class="mk"></span><span class="tx">주님의 너그러우신 은혜로</span></p><p class="ln p c"><span class="mk"></span><span class="tx">저희가 땅을 일구어 얻은</span></p><p class="ln p c"><span class="mk"></span><span class="tx">이 빵을 주님께 바치오니</span></p><p class="ln p c"><span class="mk"></span><span class="tx">생명의 양식이 되게 하소서.</span></p><p class="ln r"><span class="mk">◎</span><span class="tx">하느님, 길이 찬미받으소서.</span></p></div>
+<div class="blk"><p class="ln p"><span class="mk">✛</span><span class="tx">온 누리의 주 하느님, 찬미받으소서.</span></p><p class="ln p c"><span class="mk"></span><span class="tx">주님의 너그러우신 은혜로</span></p><p class="ln p c"><span class="mk"></span><span class="tx">저희가 포도를 가꾸어 얻은</span></p><p class="ln p c"><span class="mk"></span><span class="tx">이 술을 주님께 바치오니</span></p><p class="ln p c"><span class="mk"></span><span class="tx">구원의 음료가 되게 하소서.</span></p><p class="ln r"><span class="mk">◎</span><span class="tx">하느님, 길이 찬미받으소서.</span></p></div>
+<div class="blk"><p class="ln p"><span class="mk">✛</span><span class="tx">형제 여러분,</span></p><p class="ln p c"><span class="mk"></span><span class="tx">우리가 바치는 이 제사를</span></p><p class="ln p c"><span class="mk"></span><span class="tx">전능하신 하느님 아버지께서</span></p><p class="ln p c"><span class="mk"></span><span class="tx">기꺼이 받아주시도록 기도합시다.</span></p><p class="rub">모두 일어서며</p><p class="ln r"><span class="mk">◎</span><span class="tx">사제의 손으로 바치는 이 제사가</span></p><p class="ln r c"><span class="mk"></span><span class="tx">주님의 이름에는 찬미와 영광이 되고</span></p><p class="ln r c"><span class="mk"></span><span class="tx">저희와 온 교회에는 도움이 되게 하소서.</span></p></div>
+<div id="v-offer"></div>
+<h3 class="h">감사송</h3>
+<div class="blk"><p class="ln p"><span class="mk">✛</span><span class="tx">주님께서 여러분과 함께.</span></p><p class="ln r"><span class="mk">◎</span><span class="tx">또한 사제의 영과 함께.</span></p><p class="ln p"><span class="mk">✛</span><span class="tx">마음을 드높이.</span></p><p class="ln r"><span class="mk">◎</span><span class="tx">주님께 올립니다.</span></p><p class="ln p"><span class="mk">✛</span><span class="tx">우리 주 하느님께 감사합시다.</span></p><p class="ln r"><span class="mk">◎</span><span class="tx">마땅하고 옳은 일입니다.</span></p></div>
+<h3 class="h">거룩하시도다</h3>
+<div class="blk"><p class="ln r"><span class="mk">◎</span><span class="tx">거룩하시도다! 거룩하시도다! 거룩하시도다!</span></p><p class="ln r c"><span class="mk"></span><span class="tx">온 누리의 주 하느님!</span></p><p class="ln r c"><span class="mk"></span><span class="tx">하늘과 땅에 가득 찬 그 영광!</span></p><p class="ln r c"><span class="mk"></span><span class="tx">높은 데서 호산나!</span></p><p class="ln r c"><span class="mk"></span><span class="tx">주님의 이름으로 오시는 분, 찬미받으소서.</span></p><p class="ln r c"><span class="mk"></span><span class="tx">높은 데서 호산나!</span></p></div>
+<h3 class="h">감사 기도</h3>
+<div class="blk"><p class="ln p"><span class="mk">✛</span><span class="tx">거룩하신 아버지,</span></p><p class="ln p c"><span class="mk"></span><span class="tx">아버지께서는 모든 거룩함의 샘이시옵니다.</span></p><p class="ln p c"><span class="mk"></span><span class="tx">간구하오니 성령의 힘으로 이 예물을 거룩하게 하시어</span></p><p class="ln p c"><span class="mk"></span><span class="tx">우리 주 예수 그리스도의 몸과 ✠ 피가 되게 하소서.</span></p></div>
+<h3 class="h">성찬 제정문</h3>
+<div class="blk"><p class="ln p"><span class="mk">✛</span><span class="tx">스스로 원하신 수난이 다가오자</span></p><p class="ln p c"><span class="mk"></span><span class="tx">예수님께서는 빵을 들고</span></p><p class="ln p c"><span class="mk"></span><span class="tx">감사를 드리신 다음 쪼개어</span></p><p class="ln p c"><span class="mk"></span><span class="tx">제자들에게 주시며 말씀하셨나이다.</span></p><p class="ln q">너희는 모두 이것을 받아 먹어라.</p><p class="ln q">이는 너희를 위하여 내어줄 내 몸이다.</p></div>
+<div class="blk"><p class="ln p"><span class="mk">✛</span><span class="tx">저녁을 잡수시고 같은 모양으로 잔을 들어</span></p><p class="ln p c"><span class="mk"></span><span class="tx">다시 감사를 드리신 다음</span></p><p class="ln p c"><span class="mk"></span><span class="tx">제자들에게 주시며 말씀하셨나이다.</span></p><p class="ln q">너희는 모두 이것을 받아 마셔라.</p><p class="ln q">이는 새롭고 영원한 계약을 맺는 내 피의 잔이니</p><p class="ln q">죄를 사하여 주려고</p><p class="ln q">너희와 많은 이를 위하여 흘릴 피다.</p><p class="ln q">너희는 나를 기억하여 이를 행하여라.</p></div>
+<h3 class="h">신앙의 신비</h3>
+<div class="blk"><p class="ln p"><span class="mk">✛</span><span class="tx">신앙의 신비여!</span></p><p class="ln r"><span class="mk">◎</span><span class="tx">주님께서 오실 때까지</span></p><p class="ln r c"><span class="mk"></span><span class="tx">주님의 죽음을 전하며</span></p><p class="ln r c"><span class="mk"></span><span class="tx">부활을 선포하나이다.</span></p></div>
+<h3 class="h">기념과 봉헌</h3>
+<div class="blk"><p class="ln p"><span class="mk">✛</span><span class="tx">아버지,</span></p><p class="ln p c"><span class="mk"></span><span class="tx">저희는 그리스도의 죽음과 부활을 기념하며</span></p><p class="ln p c"><span class="mk"></span><span class="tx">생명의 빵과 구원의 잔을 봉헌하나이다.</span></p><p class="ln p c"><span class="mk"></span><span class="tx">또한 저희가 아버지 앞에 나아와</span></p><p class="ln p c"><span class="mk"></span><span class="tx">봉사하게 하시니 감사하나이다.</span></p></div>
+<div class="blk"><p class="ln p"><span class="mk">✛</span><span class="tx">간절히 청하오니</span></p><p class="ln p c"><span class="mk"></span><span class="tx">저희가 그리스도의 몸과 피를 받아 모시어</span></p><p class="ln p c"><span class="mk"></span><span class="tx">성령으로 모두 한 몸을 이루게 하소서.</span></p></div>
+<h3 class="h">전구</h3>
+<div class="blk"><p class="ln p"><span class="mk">✛</span><span class="tx">주님, 온 세상에 널리 퍼져 있는 교회를 생각하시어</span></p><p class="ln p c"><span class="mk"></span><span class="tx">교황 레오 14세와 저희 주교 티토와</span></p><p class="ln p c"><span class="mk"></span><span class="tx">모든 성직자와 더불어</span></p><p class="ln p c"><span class="mk"></span><span class="tx">사랑의 교회를 이루게 하소서.</span></p></div>
+<div class="blk"><p class="ln p"><span class="mk">✛</span><span class="tx">부활의 희망 속에 고이 잠든 교우들과</span></p><p class="ln p c"><span class="mk"></span><span class="tx">세상을 떠난 다른 이들도 모두 생각하시어</span></p><p class="ln p c"><span class="mk"></span><span class="tx">그들이 주님의 빛나는 얼굴을 뵈옵게 하소서.</span></p></div>
+<div class="blk"><p class="ln p"><span class="mk">✛</span><span class="tx">저희에게도 자비를 베푸시어</span></p><p class="ln p c"><span class="mk"></span><span class="tx">영원으로부터 주님의 사랑을 받는</span></p><p class="ln p c"><span class="mk"></span><span class="tx">하느님의 어머니 복되신 동정 마리아와</span></p><p class="ln p c"><span class="mk"></span><span class="tx">그 배필이신 성 요셉과</span></p><p class="ln p c"><span class="mk"></span><span class="tx">복된 사도들과 모든 성인과 함께</span></p><p class="ln p c"><span class="mk"></span><span class="tx">영원한 삶을 누리며</span></p><p class="ln p c"><span class="mk"></span><span class="tx">성자 예수 그리스도를 통하여</span></p><p class="ln p c"><span class="mk"></span><span class="tx">아버지를 찬양하게 하소서.</span></p></div>
+<h3 class="h">마침 영광송</h3>
+<div class="blk"><p class="ln p"><span class="mk">✛</span><span class="tx">그리스도를 통하여</span></p><p class="ln p c"><span class="mk"></span><span class="tx">그리스도와 함께</span></p><p class="ln p c"><span class="mk"></span><span class="tx">그리스도 안에서</span></p><p class="ln p c"><span class="mk"></span><span class="tx">성령으로 하나 되어</span></p><p class="ln p c"><span class="mk"></span><span class="tx">전능하신 천주 성부</span></p><p class="ln p c"><span class="mk"></span><span class="tx">모든 영예와 영광을 영원히 받으소서.</span></p><p class="ln r"><span class="mk">◎</span><span class="tx">아멘.</span></p></div>
+</section>
+<section class="part" id="comm"><h2 class="part-h"><span>영성체 예식</span></h2>
+<h3 class="h">주님의 기도</h3>
+<div class="blk"><p class="ln r"><span class="mk">◎</span><span class="tx">하늘에 계신 우리 아버지,</span></p><p class="ln r c"><span class="mk"></span><span class="tx">아버지의 이름이 거룩히 빛나시며</span></p><p class="ln r c"><span class="mk"></span><span class="tx">아버지의 나라가 오시며</span></p><p class="ln r c"><span class="mk"></span><span class="tx">아버지의 뜻이 하늘에서와 같이</span></p><p class="ln r c"><span class="mk"></span><span class="tx">땅에서도 이루어지소서.</span></p><p class="ln r c"><span class="mk"></span><span class="tx">오늘 저희에게 일용할 양식을 주시고</span></p><p class="ln r c"><span class="mk"></span><span class="tx">저희에게 잘못한 이를 저희가 용서하오니</span></p><p class="ln r c"><span class="mk"></span><span class="tx">저희 죄를 용서하시고</span></p><p class="ln r c"><span class="mk"></span><span class="tx">저희를 유혹에 빠지지 않게 하시고</span></p><p class="ln r c"><span class="mk"></span><span class="tx">악에서 구하소서.</span></p></div>
+<div class="blk"><p class="ln p"><span class="mk">✛</span><span class="tx">주님, 저희를 모든 악에서 구하시고</span></p><p class="ln p c"><span class="mk"></span><span class="tx">한평생 평화롭게 하소서.</span></p><p class="ln p c"><span class="mk"></span><span class="tx">주님의 자비로 저희를 언제나 죄에서 구원하시고</span></p><p class="ln p c"><span class="mk"></span><span class="tx">모든 시련에서 보호하시어</span></p><p class="ln p c"><span class="mk"></span><span class="tx">복된 희망을 품고</span></p><p class="ln p c"><span class="mk"></span><span class="tx">구세주 예수 그리스도의 재림을 기다리게 하소서.</span></p><p class="ln r"><span class="mk">◎</span><span class="tx">주님께 나라와 권능과 영광이 영원히 있나이다.</span></p></div>
+<h3 class="h">평화 예식</h3>
+<div class="blk"><p class="ln p"><span class="mk">✛</span><span class="tx">주 예수 그리스도님,</span></p><p class="ln p c"><span class="mk"></span><span class="tx">일찍이 사도들에게 말씀하시기를</span></p><p class="ln p c"><span class="mk"></span><span class="tx">“너희에게 평화를 두고 가며 내 평화를 주노라.” 하셨으니</span></p><p class="ln p c"><span class="mk"></span><span class="tx">저희 죄를 헤아리지 마시고 교회의 믿음을 보시어</span></p><p class="ln p c"><span class="mk"></span><span class="tx">주님의 뜻대로 교회를 평화롭게 하시고 하나 되게 하소서.</span></p><p class="ln p c"><span class="mk"></span><span class="tx">주님께서는 영원히 살아 계시며 다스리시나이다.</span></p><p class="ln r"><span class="mk">◎</span><span class="tx">아멘.</span></p></div>
+<div class="blk"><p class="ln p"><span class="mk">✛</span><span class="tx">주님의 평화가 항상 여러분과 함께.</span></p><p class="ln r"><span class="mk">◎</span><span class="tx">또한 사제의 영과 함께.</span></p><p class="ln p"><span class="mk">✛</span><span class="tx">평화의 인사를 나누십시오.</span></p><p class="ln r"><span class="mk">◎</span><span class="tx">평화를 빕니다.</span></p><p class="rub">옆 사람과 평화의 인사를 나눈다.</p></div>
+<h3 class="h">하느님의 어린양</h3>
+<div class="blk"><p class="ln r"><span class="mk">◎</span><span class="tx">하느님의 어린양,</span></p><p class="ln r c"><span class="mk"></span><span class="tx">세상의 죄를 없애시는 주님, 자비를 베푸소서.</span></p><p class="ln r c"><span class="mk"></span><span class="tx">하느님의 어린양,</span></p><p class="ln r c"><span class="mk"></span><span class="tx">세상의 죄를 없애시는 주님, 자비를 베푸소서.</span></p><p class="ln r c"><span class="mk"></span><span class="tx">하느님의 어린양,</span></p><p class="ln r c"><span class="mk"></span><span class="tx">세상의 죄를 없애시는 주님, 평화를 주소서.</span></p></div>
+<h3 class="h">영성체</h3>
+<div class="blk"><p class="ln p"><span class="mk">✛</span><span class="tx">보라, 하느님의 어린양</span></p><p class="ln p c"><span class="mk"></span><span class="tx">세상의 죄를 없애시는 분이시니</span></p><p class="ln p c"><span class="mk"></span><span class="tx">이 성찬에 초대받은 이는 복되도다.</span></p><p class="ln r"><span class="mk">◎</span><span class="tx">주님, 제 안에 주님을 모시기에 합당치 않사오나</span></p><p class="ln r c"><span class="mk"></span><span class="tx">한 말씀만 하소서. 제 영혼이 곧 나으리이다.</span></p></div>
+<div id="v-commant"></div>
+<div class="blk"><p class="rub">영성체는 천주교에서 세례를 받은 신자만 모실 수 있습니다.</p></div>
+<h3 class="h">영성체 후 묵상</h3>
+<div class="blk"><p class="rub">그리스도와 일치를 이루는 가운데 잠시 마음속으로 기도합시다.</p></div>
+<div id="v-post"></div>
+</section>
+<section class="part" id="end"><h2 class="part-h"><span>마침 예식</span></h2>
+<h3 class="h">강복</h3>
+<div class="blk"><p class="ln p"><span class="mk">✛</span><span class="tx">주님께서 여러분과 함께.</span></p><p class="ln r"><span class="mk">◎</span><span class="tx">또한 사제의 영과 함께.</span></p><p class="ln p"><span class="mk">✛</span><span class="tx">전능하신 천주 성부와 성자와 ✠ 성령께서는</span></p><p class="ln p c"><span class="mk"></span><span class="tx">여기 모인 모든 이에게 강복하소서.</span></p><p class="ln r"><span class="mk">◎</span><span class="tx">아멘.</span></p></div>
+<h3 class="h">파견</h3>
+<div class="blk"><p class="ln p"><span class="mk">✛</span><span class="tx">미사가 끝났으니 가서 복음을 전합시다.</span></p><p class="ln r"><span class="mk">◎</span><span class="tx">하느님, 감사합니다.</span></p></div>
+<h3 class="h">보편 사제직과 직무 사제직을 위한 기도<small>2027년 부르심에 응답하는 성품성사의 해</small></h3>
+<article class="voc"><div class="blk">
+<p class="ln n"><span class="mk">○</span><span class="tx">사랑으로 인간을 창조하신 좋으신 하느님! 저희를 머리이신 그리스도와 한 지체로 불러주시어 한 몸인 교회를 이루게 하심에 감사드립니다.</span></p>
+<p class="ln b"><span class="mk">●</span><span class="tx">아울러 저희를 고귀한 사제직으로 초대하시어, 세상에서 복음을 증거하는 보편사제직과 성사 집전의 직무사제직을 맡기시니 감사드립니다.</span></p>
+<p class="ln n"><span class="mk">○</span><span class="tx">모태에서부터 이미 저를 아시는 주님! 당신께서는 저희의 앞길을 알고 계시니 당신께서 부르시고, 원하시는 길을 따르게 하소서.</span></p>
+<p class="ln b"><span class="mk">●</span><span class="tx">특히 이 땅에 사제 성소를 풍성하게 해주시고, 우리 군 자녀들과 병사들 안에서도 당신 복음의 전파자가 많이 배출되게 도와주소서.</span></p>
+<p class="ln r"><span class="mk">◎</span><span class="tx">“나를 따르라”고 우리를 재촉하시는 예수님! 저희가 일상에서 늘 깨어 기도하는 하느님 자녀, 당신 부르심에 합당히 응답하는 신앙인이 되게 하소서. 아멘.</span></p>
+</div><p class="credit">천주교 군종교구장 서상범 티토 주교 인준, 2026년 10월 13일</p></article>
+</section>
+<p class="fin">✠ 미사가 끝났습니다<small>평안히 가십시오</small></p>
+</main>
+<div class="tools"><button id="top" aria-label="맨 위로">↑</button></div>
+<script>
+(function(){
+  var root=document.documentElement, KEY='mass-fs', MKEY='mass-mode';
+  function get(k){try{return localStorage.getItem(k)}catch(e){return null}}
+  function set(k,v){try{localStorage.setItem(k,v)}catch(e){}}
+  var fs=parseInt(get(KEY)||'18',10); if(!(fs>=14&&fs<=28)) fs=18;
+  function apply(){root.style.setProperty('--fs',fs+'px')} apply();
+  document.getElementById('inc').onclick=function(){fs=Math.min(28,fs+2);apply();set(KEY,fs)};
+  document.getElementById('dec').onclick=function(){fs=Math.max(14,fs-2);apply();set(KEY,fs)};
+  var m=get(MKEY); if(m) root.classList.add(m);
+  var mb=document.getElementById('mode');
+  function isDark(){return root.classList.contains('dark')||(!root.classList.contains('light')&&matchMedia('(prefers-color-scheme:dark)').matches)}
+  function label(){mb.textContent=isDark()?'밝게':'어둡게'} label();
+  document.getElementById('mode').onclick=function(){
+    var dark=root.classList.contains('dark')||(!root.classList.contains('light')&&matchMedia('(prefers-color-scheme:dark)').matches);
+    root.classList.remove('dark','light'); var n=dark?'light':'dark'; root.classList.add(n); set(MKEY,n); label();
+  };
+  var top=document.getElementById('top'); top.onclick=function(){window.scrollTo({top:0,behavior:'smooth'})};
+  var prog=document.getElementById('prog'), links=[].slice.call(document.querySelectorAll('.nav a')),
+      parts=links.map(function(a){return document.getElementById(a.dataset.t)});
+  function onScroll(){
+    var y=window.scrollY, h=document.documentElement.scrollHeight-innerHeight;
+    prog.style.width=(h>0?Math.min(100,y/h*100):0)+'%';
+    top.classList.toggle('show',y>600);
+    var cur=0; parts.forEach(function(p,i){ if(p && p.getBoundingClientRect().top<120) cur=i; });
+    links.forEach(function(a,i){
+      var on=i===cur; if(on!==a.classList.contains('on')){a.classList.toggle('on',on); if(on) a.scrollIntoView({block:'nearest',inline:'center'});}
+    });
+  }
+  addEventListener('scroll',onScroll,{passive:true}); onScroll();
+})();
+</script>
+
+<script>
+(function(){
+var API='https://script.google.com/macros/s/AKfycbx-gFHU_phfT2KEgMIQEc4lPIZOSdz-cL_owQ6GxwQPAzwPcaYzNXo9fV_eUXAQ2n99/exec';
+var DAYS=['일','월','화','수','목','금','토'];
+var COLORS={'녹색':['#2E6B4A','#1F4D35','#9BE0B4'],'자색':['#5A3F7D','#3B2856','#D2B8F0'],'백색':['#8C7440','#5E4C27','#FFF4D6'],'홍색':['#9B2F2F','#6B1E1E','#FFB3A8'],'장미색':['#B0607A','#7E3F55','#FFD0DD']};
+var GLORIA='하늘 높은 곳에는 하느님께 영광\n땅에서는 마음이 착한 사람들에게 평화.\n주 하느님, 하늘의 임금님, 전능하신 아버지 하느님,\n주님을 기리나이다, 찬미하나이다,\n주님을 흠숭하나이다, 찬양하나이다,\n주님 영광 크시오니 감사하나이다.\n외아들 주 예수 그리스도님,\n주 하느님, 성부의 아드님, 하느님의 어린양 주님,\n세상의 죄를 없애시는 주님, 자비를 베푸소서.\n세상의 죄를 없애시는 주님, 저희 기도를 들어주소서.\n성부 오른편에 앉아 계신 주님, 자비를 베푸소서.\n홀로 거룩하시고, 홀로 주님이시며,\n홀로 높으신 예수 그리스도님,\n성령과 함께 아버지 하느님의 영광 안에 계시나이다.\n아멘.';
+var CREED_A='전능하신 천주 성부\n천지의 창조주를 저는 믿나이다.\n그 외아들 우리 주 예수 그리스도님,';
+var CREED_B='성령으로 인하여 동정 마리아께 잉태되어 나시고';
+var CREED_C='본시오 빌라도 통치 아래서 고난을 받으시고\n십자가에 못 박혀 돌아가시고 묻히셨으며\n저승에 가시어 사흗날에 죽은 이들 가운데서 부활하시고\n하늘에 올라 전능하신 천주 성부 오른편에 앉으시며\n그리로부터 산 이와 죽은 이를 심판하러 오시리라 믿나이다.\n성령을 믿으며\n거룩하고 보편된 교회와\n모든 성인의 통공을 믿으며\n죄의 용서와 육신의 부활을 믿으며\n영원한 삶을 믿나이다.\n아멘.';
+function esc(t){return String(t).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function lines(t){return String(t||'').split('\n').map(function(x){return x.trim()}).filter(Boolean)}
+function blocks(t){return String(t||'').split(/\n\s*\n/).map(lines).filter(function(b){return b.length})}
+function h3(t,small){return '<h3 class="h">'+esc(t)+(small?'<small>'+esc(small)+'</small>':'')+'</h3>'}
+function ln(cls,mk,t){return '<p class="ln '+cls+'"><span class="mk">'+mk+'</span><span class="tx">'+esc(t)+'</span></p>'}
+function who(arr,cls,mk){return arr.map(function(t,i){return ln(i?cls+' c':cls,i?'':mk,t)}).join('')}
+function prayer(title,t){var L=lines(t); if(!L.length) return ''; if(/^아멘\.?$/.test(L[L.length-1])) L.pop();
+  return h3(title)+'<div class="blk">'+who(L,'p','✛')+ln('r','◎','아멘.')+'</div>'}
+function reading(tag,ref,title,body,gs){var P=lines(body); if(!P.length) return '';
+  return '<article class="rd'+(gs?' gs':'')+'"><div class="rd-top"><span class="tag">'+esc(tag)+'</span><span class="ref">'+esc(ref||'')+'</span></div>'+(title?'<p class="rd-title">'+esc(title)+'</p>':'')+'<div class="rd-body">'+P.map(function(p){return '<p>'+esc(p)+'</p>'}).join('')+'</div></article>'}
+var WORD_END='<div class="blk">'+ln('n','○','주님의 말씀입니다.')+ln('r','◎','하느님, 감사합니다.')+'</div>';
+function evangelist(ref){var m=String(ref||'').trim();
+  if(/^마태/.test(m)) return '마태오'; if(/^마르/.test(m)) return '마르코'; if(/^루카/.test(m)) return '루카'; if(/^요한/.test(m)) return '요한'; return '';}
+function render(d){
+  var c=COLORS[d['시기 색']]||COLORS['녹색'];
+  var root=document.documentElement; root.style.setProperty('--h1',c[0]); root.style.setProperty('--h2',c[1]); root.style.setProperty('--dot',c[2]);
+  var m=String(d.date).match(/(\d+)-(\d+)-(\d+)/), dt=new Date(+m[1],m[2]-1,+m[3]);
+  document.getElementById('mDate').textContent=m[1]+'년 '+(+m[2])+'월 '+(+m[3])+'일 '+DAYS[dt.getDay()]+'요일';
+  document.getElementById('mTitle').textContent=d['전례일']||'미사 전례문';
+  var col=COLORS[d['시기 색']]?d['시기 색']:'녹색', sn=(String(d['전례일']||'').match(/대림|성탄|사순|부활|연중/)||[])[0];
+  document.getElementById('mSeasonTx').textContent=(sn?sn+' 시기 · ':'')+col;
+  document.title=(d['전례일']||'미사')+' 미사 · '+m[1]+'.'+m[2]+'.'+m[3];
+  var yes=function(k){return /^(예|y|yes|o|1|true)$/i.test(String(d[k]||'').trim())};
+  set('v-in', d['입당송']?h3('입당송',d['입당송 출처'])+'<div class="blk"><p class="ln">'+esc(d['입당송'])+'</p></div>':'');
+  set('v-gloria', yes('대영광송')?h3('대영광송')+'<div class="blk">'+(function(){var L=lines(GLORIA);return ln('p','✛',L[0])+who(L.slice(1),'r','◎')})()+'</div>':'');
+  set('v-collect', prayer('본기도',d['본기도']));
+  var w='';
+  w+=h3('제1독서')+reading('제1독서',d['제1독서 출처'],d['제1독서 소제목'],d['제1독서 본문'])+WORD_END;
+  var st=blocks(d['화답송 본문']), rf=String(d['화답송 후렴']||'').trim();
+  if(st.length||rf){ w+=h3('화답송',d['화답송 출처'])+'<article class="ps">'+(rf?'<p class="ps-resp"><span>후렴</span>'+esc(rf)+'</p>':'')+
+    st.map(function(b){return '<div class="pv">'+b.map(function(p){return '<p>'+esc(p)+'</p>'}).join('')+(rf?'<p class="pr">◎ '+esc(rf)+'</p>':'')+'</div>'}).join('')+'</article>'; }
+  if(lines(d['제2독서 본문']).length) w+=h3('제2독서')+reading('제2독서',d['제2독서 출처'],d['제2독서 소제목'],d['제2독서 본문'])+WORD_END;
+  var lent=/사순/.test(d['전례일']||''), A1=lent?'◎ 그리스도님, 찬미와 영광 받으소서.':'◎ 알렐루야, 알렐루야.', A2=lent?'◎ 그리스도님, 찬미와 영광 받으소서.':'◎ 알렐루야.';
+  if(lines(d['복음 환호송']).length) w+=h3('복음 환호송',d['복음 환호송 출처'])+'<article class="al"><p class="al-a">'+A1+'</p><div class="al-v">'+lines(d['복음 환호송']).map(function(p){return '<p>'+esc(p)+'</p>'}).join('')+'</div><p class="al-a">'+A2+'</p></article>';
+  var ev=evangelist(d['복음 출처']);
+  w+=h3('복음')+'<div class="blk">'+ln('p','✛','주님께서 여러분과 함께.')+ln('r','◎','또한 사제의 영과 함께.')+ln('p','✛',ev?ev+(ev==='요한'?'이':'가')+' 전한 거룩한 복음입니다.':'거룩한 복음입니다.')+'<p class="rub">이마, 입술, 가슴에 십자가를 그으며</p>'+ln('r','◎','주님, 영광 받으소서.')+'</div>'+
+     reading('복음',d['복음 출처'],d['복음 소제목'],d['복음 본문'],true)+'<div class="blk">'+ln('p','✛','주님의 말씀입니다.')+ln('r','◎','그리스도님, 찬미합니다.')+'</div>';
+  set('v-word', w);
+  set('v-creed', yes('신경')?h3('신앙 고백','사도 신경')+'<div class="blk">'+ln('p','✛','전능하신 천주 성부')+who(lines(CREED_A).slice(1),'r','◎')+'<p class="rub">다음 부분에서 모두 고개를 숙인다</p>'+ln('r c','',CREED_B)+who(lines(CREED_C),'r c','')+'</div>':'');
+  var pf=blocks(d['보편 지향 기도']);
+  set('v-pof', pf.length?h3('보편 지향 기도')+pf.map(function(b){return '<div class="blk">'+b.map(function(t,i){
+      if(/^◎/.test(t)) return ln('r','◎',t.replace(/^◎\s*/,''));
+      return '<p class="ln n'+(i?' c':'')+'"><span class="mk">'+(i?'':'○')+'</span><span class="tx">'+esc(t)+'</span></p>'}).join('')+'</div>'}).join(''):'');
+  set('v-offer', prayer('예물 기도',d['예물 기도']));
+  var cs=blocks(d['영성체송']);
+  set('v-commant', cs.length?h3('영성체송')+'<article class="csw">'+cs.map(function(b){var src=b.length>1?b[0]:'', tx=b.length>1?b.slice(1).join(' '):b[0];
+      return '<div class="cs">'+(src?'<p class="cs-src">'+esc(src)+'</p>':'')+'<p class="cs-tx">'+esc(tx)+'</p></div>'}).join('<p class="or">또는</p>')+'</article>':'');
+  set('v-post', prayer('영성체 후 기도',d['영성체 후 기도']));
+  document.querySelector('main').classList.remove('wait');
+  document.getElementById('mState').textContent='';
+  window.dispatchEvent(new Event('scroll'));
+}
+function set(id,html){var e=document.getElementById(id); if(e) e.innerHTML=html;}
+function fail(msg){document.getElementById('mState').textContent=msg; document.getElementById('mSeasonTx').textContent='';}
+var q=(location.search.match(/[?&]d=(\d{4}-\d{2}-\d{2})/)||[])[1];
+if(!q){ fail('날짜가 없는 주소입니다. 첫 화면의 "미사가 익숙하지 않아요"를 눌러 들어와 주세요.'); return; }
+var KEY='mass-'+q, saved=null;
+try{ saved=JSON.parse(localStorage.getItem(KEY)||'null'); }catch(e){}
+if(saved) render(saved);
+fetch(API+'?mass='+q+'&t='+Date.now()).then(function(r){return r.json()}).then(function(j){
+  if(j && j.mass){ render(j.mass); try{localStorage.setItem(KEY,JSON.stringify(j.mass))}catch(e){} }
+  else if(!saved) fail('이 날짜의 전례문이 아직 올라오지 않았습니다.');
+}).catch(function(){ if(!saved) fail('인터넷에 연결되지 않아 전례문을 불러오지 못했습니다. 연결된 뒤 다시 열어 주세요.'); });
+})();
+</script>
+</body>
+</html>
