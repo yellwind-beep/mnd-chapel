@@ -90,6 +90,18 @@ main{max-width:680px; margin:0 auto; padding:8px 18px 120px}
 main.wait .part{display:none}
 #top{opacity:0; pointer-events:none; transition:opacity .2s}
 #top.show{opacity:1; pointer-events:auto}
+
+/* 전날·다음날 이동 */
+.daynav{display:flex; justify-content:space-between; gap:8px; margin-top:14px}
+.daynav:empty{display:none}
+.daynav a{font-weight:700; font-size:.7em; line-height:1; color:#fff; text-decoration:none; background:rgba(255,255,255,.14); border:1px solid rgba(255,255,255,.3); border-radius:99px; padding:8px 12px; white-space:nowrap}
+.daynav a:active{background:rgba(255,255,255,.3)}
+.daybar{display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:22px}
+.daybar:empty{display:none}
+.daybar a{display:block; min-width:0; text-decoration:none; color:var(--ink); background:var(--paper); border:1px solid var(--line); border-radius:16px; padding:12px 14px; font-weight:700; font-size:.82em; line-height:1.45}
+.daybar a small{display:block; font-weight:600; color:var(--sub); font-size:.84em; margin-bottom:2px}
+.daybar .db-n{text-align:right}
+.daybar .off{visibility:hidden}
 </style>
 </head>
 <body>
@@ -99,6 +111,7 @@ main.wait .part{display:none}
 <p class="date" id="mDate">&nbsp;</p>
 <h1 id="mTitle">미사 전례문</h1>
 <span class="season" id="mSeason"><i></i><b id="mSeasonTx">불러오는 중…</b></span>
+<div class="daynav" id="dayNav"></div>
 <div class="legend"><span><b>✛</b> 사제</span><span><b>◎</b> 교우</span><span><b>○</b> 독서자·선창</span></div>
 <div class="ctl"><span>글자</span><button id="dec" aria-label="글자 작게">가−</button><button id="inc" aria-label="글자 크게">가+</button><button id="mode" aria-label="화면 밝기 바꾸기">어둡게</button></div>
 </header>
@@ -186,6 +199,7 @@ main.wait .part{display:none}
 </div><p class="credit">천주교 군종교구장 서상범 티토 주교 인준, 2026년 10월 13일</p></article>
 </section>
 <p class="fin">✠ 미사가 끝났습니다<small>평안히 가십시오</small></p>
+<nav class="daybar" id="dayBar" aria-label="전날·다음날 전례문"></nav>
 </main>
 <div class="tools"><button id="top" aria-label="맨 위로">↑</button></div>
 <script>
@@ -243,6 +257,17 @@ function reading(tag,ref,title,body,gs){var P=lines(body); if(!P.length) return 
 var WORD_END='<div class="blk">'+ln('n','○','주님의 말씀입니다.')+ln('r','◎','하느님, 감사합니다.')+'</div>';
 function evangelist(ref){var m=String(ref||'').trim();
   if(/^마태/.test(m)) return '마태오'; if(/^마르/.test(m)) return '마르코'; if(/^루카/.test(m)) return '루카'; if(/^요한/.test(m)) return '요한'; return '';}
+function dayNavHtml(nav, base){
+  nav = nav || {};
+  var D=['일','월','화','수','목','금','토'];
+  var lab=function(x){var m=String(x.date).match(/(\d+)-(\d+)-(\d+)/), d=new Date(+m[1],m[2]-1,+m[3]); return (+m[2])+'월 '+(+m[3])+'일('+D[d.getDay()]+')';};
+  var esc2=function(t){return String(t).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})};
+  var a=function(x,cls,txt){return x?'<a class="'+cls+'" href="'+base+'?d='+x.date+'">'+txt+'</a>':'<span class="'+cls+' off"></span>'};
+  return {
+    top: (nav.prev||nav.next) ? a(nav.prev,'dn-p','‹ '+(nav.prev?lab(nav.prev):''))+a(nav.next,'dn-n',(nav.next?lab(nav.next):'')+' ›') : '',
+    bottom: (nav.prev||nav.next) ? a(nav.prev,'db-p',nav.prev?'<small>‹ 전날 · '+lab(nav.prev)+'</small>'+esc2(nav.prev.title||''):'')+a(nav.next,'db-n',nav.next?'<small>다음날 · '+lab(nav.next)+' ›</small>'+esc2(nav.next.title||''):'') : ''
+  };
+}
 function render(d){
   var c=COLORS[d['시기 색']]||COLORS['녹색'];
   var root=document.documentElement; root.style.setProperty('--h1',c[0]); root.style.setProperty('--h2',c[1]); root.style.setProperty('--dot',c[2]);
@@ -283,6 +308,7 @@ function render(d){
   var md=lines(d['영성체 후 묵상']);
   set('v-medit', md.length?'<div class="blk">'+md.map(function(t){return '<p class="ln">'+esc(t)+'</p>'}).join('')+'</div>':'');
   set('v-post', prayer('영성체 후 기도',d['영성체 후 기도']));
+  var dn=dayNavHtml(d.nav,'/mass/'); document.getElementById('dayNav').innerHTML=dn.top; document.getElementById('dayBar').innerHTML=dn.bottom;
   document.querySelector('main').classList.remove('wait');
   document.getElementById('mState').textContent='';
   window.dispatchEvent(new Event('scroll'));

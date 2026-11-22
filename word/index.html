@@ -106,6 +106,18 @@ main{max-width:640px; margin:0 auto; padding:6px max(16px,env(safe-area-inset-ri
   box-shadow:0 4px 14px rgba(0,0,0,.12); opacity:0; pointer-events:none; transition:opacity .2s; cursor:pointer}
 #up.show{opacity:1; pointer-events:auto}
 main.wait .sec,main.wait .full{display:none}
+
+/* 전날·다음날 이동 */
+.daynav{display:flex; justify-content:space-between; gap:8px; margin-top:14px}
+.daynav:empty{display:none}
+.daynav a{font-weight:700; font-size:.7em; line-height:1; color:#fff; text-decoration:none; background:rgba(255,255,255,.14); border:1px solid rgba(255,255,255,.3); border-radius:99px; padding:8px 12px; white-space:nowrap}
+.daynav a:active{background:rgba(255,255,255,.3)}
+.daybar{display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:22px}
+.daybar:empty{display:none}
+.daybar a{display:block; min-width:0; text-decoration:none; color:var(--ink); background:var(--paper); border:1px solid var(--line); border-radius:16px; padding:12px 14px; font-weight:700; font-size:.82em; line-height:1.45}
+.daybar a small{display:block; font-weight:600; color:var(--sub); font-size:.84em; margin-bottom:2px}
+.daybar .db-n{text-align:right}
+.daybar .off{visibility:hidden}
 </style>
 </head>
 <body>
@@ -117,11 +129,13 @@ main.wait .sec,main.wait .full{display:none}
   <p class="date" id="wDate">&nbsp;</p>
   <h1 id="wTitle">오늘의 말씀</h1>
   <span class="season"><i></i><span id="wSeason">불러오는 중…</span></span>
+<div class="daynav" id="dayNav"></div>
 </header>
 <nav class="nav" aria-label="말씀 목차"><div class="row" id="navRow"></div></nav>
 <main class="wait">
   <p class="state" id="wState">말씀을 불러오는 중입니다…</p>
   <div id="wBody"></div>
+  <nav class="daybar" id="dayBar" aria-label="전날·다음날 말씀"></nav>
   <a class="full" id="wFull" href="/mass/"><span>미사 전체 순서 보기<small>기도문과 응답까지 차례대로</small></span><span>›</span></a>
 </main>
 <button id="up" aria-label="맨 위로">↑</button>
@@ -154,6 +168,17 @@ function paras(t){return lines(t).map(function(p){return '<p>'+esc(p)+'</p>'}).j
 function sec(id,name,ref,inner,cls){return '<section class="sec'+(cls?' '+cls:'')+'" id="'+id+'"><div class="label"><h2>'+esc(name)+'</h2>'+(ref?'<span class="ref">'+esc(ref)+'</span>':'')+'</div><div class="card">'+inner+'</div></section>'}
 function evangelist(ref){var m=String(ref||'').trim(); if(/^마태/.test(m)) return '마태오가'; if(/^마르/.test(m)) return '마르코가'; if(/^루카/.test(m)) return '루카가'; if(/^요한/.test(m)) return '요한이'; return '';}
 
+function dayNavHtml(nav, base){
+  nav = nav || {};
+  var D=['일','월','화','수','목','금','토'];
+  var lab=function(x){var m=String(x.date).match(/(\d+)-(\d+)-(\d+)/), d=new Date(+m[1],m[2]-1,+m[3]); return (+m[2])+'월 '+(+m[3])+'일('+D[d.getDay()]+')';};
+  var esc2=function(t){return String(t).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})};
+  var a=function(x,cls,txt){return x?'<a class="'+cls+'" href="'+base+'?d='+x.date+'">'+txt+'</a>':'<span class="'+cls+' off"></span>'};
+  return {
+    top: (nav.prev||nav.next) ? a(nav.prev,'dn-p','‹ '+(nav.prev?lab(nav.prev):''))+a(nav.next,'dn-n',(nav.next?lab(nav.next):'')+' ›') : '',
+    bottom: (nav.prev||nav.next) ? a(nav.prev,'db-p',nav.prev?'<small>‹ 전날 · '+lab(nav.prev)+'</small>'+esc2(nav.prev.title||''):'')+a(nav.next,'db-n',nav.next?'<small>다음날 · '+lab(nav.next)+' ›</small>'+esc2(nav.next.title||''):'') : ''
+  };
+}
 function render(d){
   var c=COLORS[d['시기 색']]||COLORS['녹색'];
   root.style.setProperty('--s1',c[0]); root.style.setProperty('--s2',c[1]); root.style.setProperty('--dot',c[3]);
@@ -187,6 +212,7 @@ function render(d){
   document.getElementById('wBody').innerHTML=h;
   document.getElementById('navRow').innerHTML=nav.map(function(n){return '<a href="#'+n[0]+'" data-t="'+n[0]+'">'+n[1]+'</a>'}).join('');
   document.getElementById('wFull').href='/mass/?d='+d.date;
+  var dn=dayNavHtml(d.nav,'/word/'); document.getElementById('dayNav').innerHTML=dn.top; document.getElementById('dayBar').innerHTML=dn.bottom;
   document.querySelector('main').classList.remove('wait');
   document.getElementById('wState').textContent='';
   onScroll();

@@ -29,7 +29,16 @@ function doGet(e) {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
   // 전례문 한 개: ?mass=2026-11-26
   const 요청날짜 = e && e.parameter && e.parameter.mass;
-  if (요청날짜) return json_({ mass: 전례문_(ss, 요청날짜) });
+  if (요청날짜) {
+    const mass = 전례문_(ss, 요청날짜);
+    if (mass) {
+      // 전날·다음날 전례문이 있으면 화면에 이동 버튼을 보여 주도록 함께 보냄
+      const 목록 = 전례문목록_(ss);
+      const 찾기 = (n) => 목록.find((x) => x.date === 날짜더하기_(mass.date, n)) || null;
+      mass.nav = { prev: 찾기(-1), next: 찾기(1) };
+    }
+    return json_({ mass: mass });
+  }
   return json_({
     info: 키값읽기_(ss.getSheetByName(탭.정보)),
     masses: 표읽기_(ss.getSheetByName(탭.미사)),
@@ -66,6 +75,12 @@ function 전례문읽기_(sh) {
   if (!d) return null;
   o.date = d[1] + '-' + ('0' + d[2]).slice(-2) + '-' + ('0' + d[3]).slice(-2);
   return o;
+}
+
+function 날짜더하기_(ymd, n) {
+  const p = String(ymd).split('-').map(Number);
+  const d = new Date(Date.UTC(p[0], p[1] - 1, p[2] + n));
+  return d.toISOString().slice(0, 10);
 }
 
 function 전례문목록_(ss) {
