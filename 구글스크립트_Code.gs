@@ -568,3 +568,189 @@ function 안전하게_(v) {
 function json_(o) {
   return ContentService.createTextOutput(JSON.stringify(o)).setMimeType(ContentService.MimeType.JSON);
 }
+
+/* ---------- 매일 미사 전례문 자동 가져오기 ----------
+ * 굿뉴스 매일미사에서 오늘부터 2주 동안의 전례문을 읽어,
+ * 아직 '전례문 …' 탭이 없는 날짜만 '전례문 양식'을 복사해 새 탭으로 채웁니다.
+ * - 이미 있는 탭(직접 넣거나 고친 것)은 건드리지 않습니다.
+ * - 처음 한 번 'setupLiturgy'를 실행하면 매일 새벽 4시에 자동으로 돕니다.
+ */
+const 전례문_며칠앞까지 = 14;
+
+function setupLiturgy() {
+  ScriptApp.getProjectTriggers().forEach((t) => {
+    if (t.getHandlerFunction() === '전례문채우기') ScriptApp.deleteTrigger(t);
+  });
+  ScriptApp.newTrigger('전례문채우기').timeBased().everyDays(1).atHour(4).inTimezone('Asia/Seoul').create();
+  const n = 전례문채우기();
+  SpreadsheetApp.getActiveSpreadsheet().toast(`전례문 자동 가져오기를 켰습니다. (새로 만든 날짜 ${n}개)`);
+}
+
+function 전례문채우기() {
+  const lock = LockService.getScriptLock();
+  if (!lock.tryLock(30000)) return 0;
+  try {
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    const 양식 = ss.getSheetByName(전례문_양식);
+    if (!양식) return 0;
+    const 있는날 = new Set(전례문탭들_(ss).map(전례문읽기_).filter(Boolean).map((o) => o.date));
+    let 만든수 = 0;
+    날마다_(전례문_며칠앞까지).forEach((k) => {
+      if (있는날.has(k)) return;
+      const o = 굿뉴스전례문_(k);
+      if (!o) return;
+      const 이름 = 빈탭이름_(ss, '전례문 ' + k.slice(5, 7) + k.slice(8, 10));
+      const sh = 양식.copyTo(ss).setName(이름);
+      // 날짜 순서대로 놓기
+      const 뒤 = 전례문탭들_(ss).filter((x) => x.getName() !== 이름 && (전례문읽기_(x) || {}).date > k)
+        .sort((a, b) => a.getIndex() - b.getIndex())[0];
+      ss.setActiveSheet(sh);
+      ss.moveActiveSheet(뒤 ? 뒤.getIndex() : ss.getNumSheets());
+      const 항목 = sh.getRange(1, 1, sh.getLastRow(), 1).getValues().map((r) => String(r[0]).trim());
+      항목.forEach((h, i) => {
+        if (i === 0 || !(h in o)) return;
+        sh.getRange(i + 1, 2).setNumberFormat('@').setValue(o[h]);
+      });
+      있는날.add(k);
+      만든수++;
+    });
+    return 만든수;
+  } finally {
+    lock.releaseLock();
+  }
+}
+
+function 빈탭이름_(ss, 이름) {
+  let n = 이름, i = 2;
+  while (ss.getSheetByName(n)) n = 이름 + ' (' + (i++) + ')';
+  return n;
+}
+
+function 굿뉴스전례문_(날짜키) {
+  try {
+    const res = UrlFetchApp.fetch(굿뉴스_주소 + 날짜키, { muteHttpExceptions: true, followRedirects: true });
+    if (res.getResponseCode() !== 200) return null;
+    return 전례문뽑기_(res.getContentText('UTF-8'), 날짜키);
+  } catch (err) {
+    console.warn('굿뉴스 전례문 실패 ' + 날짜키 + ': ' + err.message);
+    return null;
+  }
+}
+
+// 굿뉴스 페이지 → 시트 항목 { '전례일': …, '제1독서 본문': … }
+function 전례문뽑기_(html, 날짜키) {
+  const 줄글 = (x) => String(x)
+    .replace(/<br\s*\/?>/gi, '\n').replace(/<\/(p|div|li|h\d)>/gi, '\n').replace(/<[^>]+>/g, '')
+    .replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;|&apos;/g, "'")
+    .replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&').replace(/\r/g, '');
+  const 칸 = {};
+  html.split(/<h3[^>]*class="[^"]*bd_tit[^"]*"[^>]*>/i).slice(1).forEach((p) => {
+    const i = p.indexOf('</h3>');
+    if (i < 0) return;
+    const 제목 = 줄글(p.slice(0, i)).trim();
+    if (!(제목 in 칸)) 칸[제목] = 줄글(p.slice(i + 5));
+  });
+  if (!칸['복음'] || !칸['제1독서']) return null;
+
+  const 줄들 = (t) => String(t || '').split('\n').map((s) => s.replace(/\s+/g, ' ').trim()).filter(Boolean);
+  const 표시 = /^<[^>]*>$/;
+  const 전체 = Object.keys(칸).map((k) => 칸[k]).join('\n');
+  const 맺음 = (L) => L.map((s) => s
+    .replace(/^성부와 성령과\s*…+\.?$/, '성부와 성령과 함께 천주로서 영원히 살아 계시며 다스리시는 성자 우리 주 예수 그리스도를 통하여 비나이다.')
+    .replace(/^우리 주\s*…+\.?$/, '우리 주 그리스도를 통하여 비나이다.'));
+  const 기도 = (t) => 맺음(줄들(t).filter((s) => !표시.test(s))).join('\n');
+  const 절번호빼기 = (s) => s.replace(/(^|\s)\d+(?:,\d+)?(?=\s)/g, '$1').replace(/\s+/g, ' ').trim();
+  const 문장나누기 = (s) => s.split(/(?<=[.?!]['’”]?)\s+/).map((x) => x.trim()).filter(Boolean).join('\n');
+  const 출처같음 = (s) => /\d/.test(s) && /[,.]/.test(s) && s.length < 60 && !/[다요]\.$/.test(s);
+
+  // 독서·복음: 소제목, 출처, 본문
+  const 읽기 = (t, 복음) => {
+    const L = 줄들(t);
+    let 소제목 = '', 출처 = '', 본문 = [], 본문중 = false;
+    for (const s of L) {
+      if (!본문중) {
+        if (!소제목 && 표시.test(s)) { 소제목 = s.slice(1, -1).trim(); continue; }
+        const m = 복음
+          ? s.match(/^✠?\s*(\S+?)(?:가|이)\s*전한\s*거룩한\s*복음입니다\.?\s*(.*)$/)
+          : s.match(/^▥?\s*(.+?)의?\s*말씀입니다\.?\s*(.*)$/);
+        if (m) {
+          let 책 = m[1].replace(/^사도\s+\S+의\s+/, '').replace(/의$/, '').trim();
+          if (복음) 책 = { 마태오: '마태', 마르코: '마르', 루카: '루카', 요한: '요한' }[책] || 책;
+          출처 = (책 + ' ' + m[2].trim()).trim();
+          본문중 = true;
+        }
+        continue;
+      }
+      if (/^주님의 말씀입니다/.test(s) || /^<(또는|강론)/.test(s) || /^◎/.test(s)) break;
+      본문.push(절번호빼기(s));
+    }
+    return { 소제목, 출처, 본문: 본문.filter(Boolean).join('\n') };
+  };
+
+  const o = {};
+  o['날짜'] = 날짜키;
+  const 전례 = 전례뽑기_(html);                           // '(녹)연중 제34주간 월요일'
+  const 색 = (전례.match(/^\((.)/) || [])[1] || '';
+  o['전례일'] = 전례.replace(/^\([^)]*\)\s*/, '');
+  o['시기 색'] = { 녹: '녹색', 자: '자색', 백: '백색', 홍: '홍색', 장: '장미색' }[색] || '녹색';
+  o['대영광송'] = /<대영광송>/.test(전체) ? '예' : '아니요';
+  o['신경'] = /<신경/.test(전체) ? '예' : '아니요';
+
+  // 입당송
+  const 입 = 줄들(칸['입당송']).map((s) => s.replace(/<[^>]*>/g, '').trim()).filter(Boolean);
+  if (입.length) {
+    if (입.length > 1 && 출처같음(입[0])) { o['입당송 출처'] = 입[0]; o['입당송'] = 입.slice(1).join(' '); }
+    else o['입당송'] = 입.join(' ');
+  }
+  o['본기도'] = 기도(칸['본기도']);
+
+  const r1 = 읽기(칸['제1독서']);
+  o['제1독서 출처'] = r1.출처; o['제1독서 소제목'] = r1.소제목; o['제1독서 본문'] = r1.본문;
+
+  // 화답송
+  const 화 = 줄들(칸['화답송']);
+  if (화.length) {
+    if (!/^[◎○]/.test(화[0])) o['화답송 출처'] = 화[0].replace(/\s*\(◎[^)]*\)\s*$/, '');
+    o['화답송 후렴'] = ((화.find((s) => /^◎/.test(s)) || '').replace(/^◎\s*/, ''));
+    o['화답송 본문'] = 화.filter((s) => /^○/.test(s)).map((s) => 문장나누기(s.replace(/^○\s*/, '').replace(/\s*◎\s*$/, ''))).join('\n\n');
+  }
+
+  if (칸['제2독서']) {
+    const r2 = 읽기(칸['제2독서']);
+    o['제2독서 출처'] = r2.출처; o['제2독서 소제목'] = r2.소제목; o['제2독서 본문'] = r2.본문;
+  }
+
+  // 복음 환호송
+  const 환 = 줄들(칸['복음 환호송']);
+  if (환.length) {
+    if (!/^[◎○]/.test(환[0])) o['복음 환호송 출처'] = 환[0];
+    o['복음 환호송'] = 환.filter((s) => /^○/.test(s)).map((s) => 문장나누기(s.replace(/^○\s*/, ''))).join('\n');
+  }
+
+  const g = 읽기(칸['복음'], true);
+  o['복음 출처'] = g.출처; o['복음 소제목'] = g.소제목; o['복음 본문'] = g.본문;
+
+  // 보편 지향 기도 (주일·대축일): 지향마다 응답을 붙임
+  if (칸['보편 지향 기도']) {
+    const 묶음 = [];
+    줄들(칸['보편 지향 기도']).filter((s) => !표시.test(s)).forEach((s) => {
+      if (/^\d+\./.test(s) || !묶음.length) 묶음.push([s]); else 묶음[묶음.length - 1].push(s);
+    });
+    o['보편 지향 기도'] = 묶음.map((b) => b.concat('◎ 주님, 저희의 기도를 들어주소서.').join('\n')).join('\n\n');
+  }
+
+  o['예물 기도'] = 기도(칸['예물기도'] || 칸['예물 기도']);
+  if (칸['감사송']) o['감사송'] = 줄들(칸['감사송']).join('\n');
+
+  // 영성체송: <또는>으로 나뉜 것은 빈 줄로
+  const 영 = 줄들(칸['영성체송']);
+  if (영.length) {
+    const 묶음 = [[]];
+    영.forEach((s) => { if (/^<\s*또는\s*>$/.test(s)) 묶음.push([]); else if (!표시.test(s)) 묶음[묶음.length - 1].push(s); });
+    o['영성체송'] = 묶음.filter((b) => b.length).map((b) => b.join('\n')).join('\n\n');
+  }
+  const 묵상 = 줄들(칸['영성체 후 묵상']).filter((s) => !표시.test(s)).join('\n');
+  if (묵상) o['영성체 후 묵상'] = 묵상;
+  o['영성체 후 기도'] = 기도(칸['영성체 후 기도']);
+  return o;
+}
