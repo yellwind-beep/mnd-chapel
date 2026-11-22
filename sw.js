@@ -3,7 +3,7 @@
  * - 글꼴: 한 번 받으면 저장본 사용
  * - 공지·미사 시간(구글 스크립트)은 건드리지 않음 (홈페이지가 따로 저장해 둠)
  */
-const CACHE = 'chapel-v33';
+const CACHE = 'chapel-v34';
 const CORE = ['/', '/index.html', '/manifest.webmanifest', '/icons/icon-192.png', '/icons/favicon.svg'];
 const FONT_HOSTS = ['fonts.googleapis.com', 'fonts.gstatic.com', 'cdn.jsdelivr.net'];
 
@@ -27,7 +27,8 @@ self.addEventListener('fetch', (e) => {
   // 같은 사이트 파일: 인터넷 먼저, 실패하면 저장본
   if (url.origin === self.location.origin) {
     e.respondWith(
-      fetch(req)
+      // 브라우저 임시 저장본을 건너뛰고 항상 서버에 새 버전이 있는지 확인
+      fetch(req.url, { cache: 'no-cache', credentials: 'same-origin' })
         .then((res) => {
           if (res.ok) { const copy = res.clone(); caches.open(CACHE).then((c) => c.put(req, copy)); }
           return res;
