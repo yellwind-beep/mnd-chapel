@@ -242,5 +242,6 @@ fetch(API+'?mass='+q+'&t='+Date.now()).then(function(r){return r.json()}).then(f
 }).catch(function(){ if(!saved) fail('인터넷에 연결되지 않아 말씀을 불러오지 못했습니다. 연결된 뒤 다시 열어 주세요.'); });
 })();
 </script>
+<script>try{navigator.serviceWorker&&navigator.serviceWorker.getRegistration().then(function(r){r&&r.update()})}catch(e){}</script>
 </body>
 </html>

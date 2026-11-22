@@ -1019,7 +1019,22 @@ load();
 
 /* 앱(홈 화면에 추가)용: 오프라인 대비 */
 if ('serviceWorker' in navigator && location.protocol === 'https:') {
-  window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js').catch(() => {}); });
+  // 새 버전이 올라오면 바로 받아서 화면을 한 번 새로 고침 (앱에서 예전 화면이 남지 않게)
+  const hadController = !!navigator.serviceWorker.controller;
+  let reloaded = false;
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (!hadController || reloaded) return;
+    reloaded = true;
+    location.reload();
+  });
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js', { updateViaCache: 'none' })
+      .then((reg) => reg.update())
+      .catch(() => {});
+  });
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') navigator.serviceWorker.getRegistration().then((r) => r && r.update()).catch(() => {});
+  });
 }
 </script>
 </body>
