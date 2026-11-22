@@ -70,7 +70,7 @@ main{max-width:640px; margin:0 auto; padding:6px max(16px,env(safe-area-inset-ri
 @media (prefers-color-scheme:dark){:root:not(.light) .label h2{color:var(--sub)}}
 .label .ref{font-size:.72em; color:var(--sub); font-weight:600; text-align:right}
 .card{background:var(--paper); border:1px solid var(--line); border-radius:20px; padding:20px 20px 22px}
-.title{font:600 .9em/1.6 var(--serif); color:var(--s1); background:var(--tint); border-radius:12px; padding:10px 14px; margin-bottom:14px}
+.title{font:600 .9em/1.6 var(--serif); color:var(--s1); background:color-mix(in srgb,var(--s1) 11%,var(--paper)); border-radius:12px; padding:10px 14px; margin-bottom:14px}
 :root.dark .title{color:var(--ink)}
 @media (prefers-color-scheme:dark){:root:not(.light) .title{color:var(--ink)}}
 .body{font-family:var(--serif); font-weight:500; line-height:1.9}
@@ -96,9 +96,11 @@ main{max-width:640px; margin:0 auto; padding:6px max(16px,env(safe-area-inset-ri
 .or{display:block; text-align:center; font-size:.7em; letter-spacing:.3em; color:var(--sub); margin:12px 0 0}
 
 .full{display:flex; align-items:center; justify-content:space-between; gap:10px; margin-top:28px; padding:16px 18px; border-radius:16px;
-  background:var(--tint); color:var(--ink); text-decoration:none; font-weight:700; font-size:.88em}
+  background:color-mix(in srgb,var(--s1) 11%,var(--paper)); color:var(--ink); text-decoration:none; font-weight:700; font-size:.88em}
 .full small{display:block; font-weight:500; color:var(--sub); font-size:.86em}
 .full span:last-child{color:var(--s1); font-size:1.3em}
+:root.dark .full span:last-child{color:var(--ink)}
+@media (prefers-color-scheme:dark){:root:not(.light) .full span:last-child{color:var(--ink)}}
 #up{position:fixed; right:max(14px,env(safe-area-inset-right)); bottom:calc(16px + env(safe-area-inset-bottom)); width:42px; height:42px;
   border-radius:50%; border:1px solid var(--line); background:var(--paper); color:var(--ink); font:700 15px/1 var(--sans);
   box-shadow:0 4px 14px rgba(0,0,0,.12); opacity:0; pointer-events:none; transition:opacity .2s; cursor:pointer}
@@ -154,7 +156,7 @@ function evangelist(ref){var m=String(ref||'').trim(); if(/^마태/.test(m)) ret
 
 function render(d){
   var c=COLORS[d['시기 색']]||COLORS['녹색'];
-  root.style.setProperty('--s1',c[0]); root.style.setProperty('--s2',c[1]); root.style.setProperty('--tint',c[2]); root.style.setProperty('--dot',c[3]);
+  root.style.setProperty('--s1',c[0]); root.style.setProperty('--s2',c[1]); root.style.setProperty('--dot',c[3]);
   document.querySelector('meta[name=theme-color]').setAttribute('content',c[0]);
   var m=String(d.date).match(/(\d+)-(\d+)-(\d+)/), dt=new Date(+m[1],m[2]-1,+m[3]);
   document.getElementById('wDate').textContent=m[1]+'년 '+(+m[2])+'월 '+(+m[3])+'일 '+DAYS[dt.getDay()]+'요일';
