@@ -193,7 +193,7 @@ function render(d){
   if(d['입당송']){ h+=sec('w-in','입당송',d['입당송 출처'],'<p class="ant">'+esc(d['입당송'])+'</p>'); nav.push(['w-in','입당송']); }
   var reading=function(id,name,ref,title,body){ if(!lines(body).length) return '';
     nav.push([id,name]);
-    return sec(id,name,ref,(title?'<p class="title">'+esc(title)+'</p>':'')+'<div class="body">'+paras(body)+'</div>'+
+    return sec(id,name,ref,'<div class="body">'+paras(body)+'</div>'+
       '<p class="end">주님의 말씀입니다. <b>◎ 하느님, 감사합니다.</b></p>'); };
   h+=reading('w-r1','제1독서',d['제1독서 출처'],d['제1독서 소제목'],d['제1독서 본문']);
   var st=blocks(d['화답송 본문']), rf=String(d['화답송 후렴']||'').trim();
@@ -203,7 +203,7 @@ function render(d){
   h+=reading('w-r2','제2독서',d['제2독서 출처'],d['제2독서 소제목'],d['제2독서 본문']);
   if(lines(d['복음 본문']).length){ nav.push(['w-gs','복음']); var ev=evangelist(d['복음 출처']);
     h+=sec('w-gs','복음',d['복음 출처'],(ev?'<p class="acc" style="color:var(--sub);font-weight:600">'+esc(ev)+' 전한 거룩한 복음입니다.</p>':'')+
-      (d['복음 소제목']?'<p class="title">'+esc(d['복음 소제목'])+'</p>':'')+'<div class="body">'+paras(d['복음 본문'])+'</div>'+
+      '<div class="body">'+paras(d['복음 본문'])+'</div>'+
       '<p class="end">주님의 말씀입니다. <b>◎ 그리스도님, 찬미합니다.</b></p>','gospel'); }
   var cs=blocks(d['영성체송']);
   if(cs.length){ nav.push(['w-cs','영성체송']);

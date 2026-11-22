@@ -253,7 +253,7 @@ function who(arr,cls,mk){return arr.map(function(t,i){return ln(i?cls+' c':cls,i
 function prayer(title,t){var L=lines(t); if(!L.length) return ''; if(/^아멘\.?$/.test(L[L.length-1])) L.pop();
   return h3(title)+'<div class="blk">'+who(L,'p','✛')+ln('r','◎','아멘.')+'</div>'}
 function reading(tag,ref,title,body,gs){var P=lines(body); if(!P.length) return '';
-  return '<article class="rd'+(gs?' gs':'')+'"><div class="rd-top"><span class="tag">'+esc(tag)+'</span><span class="ref">'+esc(ref||'')+'</span></div>'+(title?'<p class="rd-title">'+esc(title)+'</p>':'')+'<div class="rd-body">'+P.map(function(p){return '<p>'+esc(p)+'</p>'}).join('')+'</div></article>'}
+  return '<article class="rd'+(gs?' gs':'')+'"><div class="rd-top"><span class="tag">'+esc(tag)+'</span><span class="ref">'+esc(ref||'')+'</span></div>'+'<div class="rd-body">'+P.map(function(p){return '<p>'+esc(p)+'</p>'}).join('')+'</div></article>'}
 var WORD_END='<div class="blk">'+ln('n','○','주님의 말씀입니다.')+ln('r','◎','하느님, 감사합니다.')+'</div>';
 function evangelist(ref){var m=String(ref||'').trim();
   if(/^마태/.test(m)) return '마태오'; if(/^마르/.test(m)) return '마르코'; if(/^루카/.test(m)) return '루카'; if(/^요한/.test(m)) return '요한'; return '';}
