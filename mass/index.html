@@ -133,6 +133,7 @@ main.wait .part{display:none}
 <div id="v-offer"></div>
 <h3 class="h">감사송</h3>
 <div class="blk"><p class="ln p"><span class="mk">✛</span><span class="tx">주님께서 여러분과 함께.</span></p><p class="ln r"><span class="mk">◎</span><span class="tx">또한 사제의 영과 함께.</span></p><p class="ln p"><span class="mk">✛</span><span class="tx">마음을 드높이.</span></p><p class="ln r"><span class="mk">◎</span><span class="tx">주님께 올립니다.</span></p><p class="ln p"><span class="mk">✛</span><span class="tx">우리 주 하느님께 감사합시다.</span></p><p class="ln r"><span class="mk">◎</span><span class="tx">마땅하고 옳은 일입니다.</span></p></div>
+<div id="v-preface"></div>
 <h3 class="h">거룩하시도다</h3>
 <div class="blk"><p class="ln r"><span class="mk">◎</span><span class="tx">거룩하시도다! 거룩하시도다! 거룩하시도다!</span></p><p class="ln r c"><span class="mk"></span><span class="tx">온 누리의 주 하느님!</span></p><p class="ln r c"><span class="mk"></span><span class="tx">하늘과 땅에 가득 찬 그 영광!</span></p><p class="ln r c"><span class="mk"></span><span class="tx">높은 데서 호산나!</span></p><p class="ln r c"><span class="mk"></span><span class="tx">주님의 이름으로 오시는 분, 찬미받으소서.</span></p><p class="ln r c"><span class="mk"></span><span class="tx">높은 데서 호산나!</span></p></div>
 <h3 class="h">감사 기도</h3>
@@ -166,6 +167,7 @@ main.wait .part{display:none}
 <div id="v-commant"></div>
 <div class="blk"><p class="rub">영성체는 천주교에서 세례를 받은 신자만 모실 수 있습니다.</p></div>
 <h3 class="h">영성체 후 묵상</h3>
+<div id="v-medit"></div>
 <div class="blk"><p class="rub">그리스도와 일치를 이루는 가운데 잠시 마음속으로 기도합시다.</p></div>
 <div id="v-post"></div>
 </section>
@@ -275,6 +277,11 @@ function render(d){
   var cs=blocks(d['영성체송']);
   set('v-commant', cs.length?h3('영성체송')+'<article class="csw">'+cs.map(function(b){var src=b.length>1?b[0]:'', tx=b.length>1?b.slice(1).join(' '):b[0];
       return '<div class="cs">'+(src?'<p class="cs-src">'+esc(src)+'</p>':'')+'<p class="cs-tx">'+esc(tx)+'</p></div>'}).join('<p class="or">또는</p>')+'</article>':'');
+  var pr=lines(d['감사송']), prTitle='';
+  if(pr.length && /^<.*>$/.test(pr[0])){ prTitle=pr.shift().replace(/^<|>$/g,''); }
+  set('v-preface', pr.length?'<div class="blk">'+(prTitle?'<p class="rub">'+esc(prTitle)+'</p>':'')+who(pr,'p','✛')+'</div>':'');
+  var md=lines(d['영성체 후 묵상']);
+  set('v-medit', md.length?'<div class="blk">'+md.map(function(t){return '<p class="ln">'+esc(t)+'</p>'}).join('')+'</div>':'');
   set('v-post', prayer('영성체 후 기도',d['영성체 후 기도']));
   document.querySelector('main').classList.remove('wait');
   document.getElementById('mState').textContent='';
