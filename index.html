@@ -58,6 +58,12 @@
   .next .when { font-family: var(--serif); font-size: 22px; font-weight: 700; margin-top: 2px; }
   .next .where { font-family: var(--sans); font-size: 15px; font-weight: 500; opacity: .85; margin-left: 10px; white-space: nowrap; }
   .next .where:empty { display: none; }
+  .next-go { flex: none; color: #fff; text-decoration: none; font-size: 13px; font-weight: 700; padding: 7px 12px; border-radius: 999px; background: rgba(255,255,255,.16); border: 1px solid rgba(255,255,255,.32); white-space: nowrap; }
+  .next-go:active { background: rgba(255,255,255,.3); }
+  @media (max-width: 480px) {
+    .next { position: relative; }
+    .next-go { position: absolute; top: 10px; right: 12px; font-size: 12px; padding: 4px 10px; }
+  }
   #nextWhen { white-space: nowrap; }
   .next .where { display: inline-block; }
   .next .when { text-wrap: wrap; }
@@ -458,6 +464,7 @@
           <div class="label" id="nextLabel">다음 미사</div>
           <div class="when"><span id="nextWhen">불러오는 중…</span><span class="where" id="nextWhere"></span></div>
         </div>
+        <a class="next-go" id="nextGo" href="#" hidden>미사 전례문 보기 ›</a>
       </div>
 
       <div class="card gospel" id="gospel" hidden>
@@ -788,6 +795,7 @@ function render(data) {
     $('#nextLabel').innerHTML = nx.changed ? '다음 미사 <span class="tag">요일 변경</span>' : '다음 미사';
     $('#nextWhen').textContent = `${rel} ${pad2(nx.dt.getHours())}:${pad2(nx.dt.getMinutes())}`;
     $('#nextWhere').textContent = nx.place;
+    showMassText(nx.dt);
   } else {
     $('#nextLabel').textContent = '다음 미사';
     $('#nextWhen').textContent = '시간표를 확인해 주세요';
@@ -821,6 +829,18 @@ function render(data) {
   $('#moreBtn').onclick = () => { shown += NOTICE_PAGE; drawNotices(); fitTitles(); };
   drawNotices();
   fitTitles();
+}
+
+// 다음 미사 날짜에 맞는 전례문(/mass/날짜.html)이 있으면 '미사 전례문 보기' 버튼 표시
+async function showMassText(dt) {
+  const key = `${dt.getFullYear()}-${pad2(dt.getMonth() + 1)}-${pad2(dt.getDate())}`;
+  try {
+    const list = await fetch('/mass/index.json', { cache: 'no-cache' }).then((r) => r.json());
+    const m = list.find((x) => x.date === key && /^\/mass\/[\w.-]+\.html$/.test(x.url || ''));
+    const a = $('#nextGo');
+    if (m) { a.href = m.url; a.setAttribute('aria-label', `${m.title} 미사 전례문 보기`); a.hidden = false; }
+    else a.hidden = true;
+  } catch (e) { /* 전례문 목록이 없으면 버튼을 숨긴 채로 둠 */ }
 }
 
 async function load() {
