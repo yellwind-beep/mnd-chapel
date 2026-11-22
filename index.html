@@ -433,6 +433,40 @@
     .gospel .g-head { font-size: 13.5px; }
     .gospel blockquote { margin-top: 9px; font-size: clamp(18.5px, 5.3vw, 21px); }
   }
+
+  /* ===== 위쪽 빈칸 없애기: 내용은 '국방부 성당' 바로 아래에서 시작하고,
+     남는 높이는 모든 칸(다음 미사·복음·안내·배너·공지·아래 두 칸) 사이에 똑같이 나눔 ===== */
+  @media (max-width: 480px) {
+    main > .wrap { justify-content: space-between; row-gap: 9px; padding-top: 6px; padding-bottom: 8px; }
+    main > .wrap::before, main > .wrap::after, main > .wrap > .sp { display: none; }
+    main > .wrap > .hero { display: contents; }
+    .hero > .next, .hero > .gospel, .hero > .guide, .hero > .duo { margin-top: 0; }
+    main > .wrap > section.block { padding: 0; }
+  }
+  @media (max-width: 480px) and (min-height: 800px) {
+    .next { padding: 24px 22px 23px; }
+    .next .when { font-size: clamp(23px, 6.6vw, 27px); }
+    .gospel { padding: 20px 20px 21px 21px; }
+    .gospel blockquote { font-size: clamp(19px, 5.4vw, 22px); }
+    .guide { padding: 13px 16px; }
+    .duo .jubo { padding: 13px 12px; }
+    .nlist details.notice summary { padding: 13px 15px; }
+    .act { padding: 13px 13px; }
+  }
+  @media (max-width: 480px) and (min-height: 880px) {
+    .next { padding: 28px 24px 27px; }
+    .next .label { font-size: 14.5px; }
+    .next .when { font-size: clamp(25px, 7vw, 29px); }
+    .next .where { font-size: 16px; }
+    .gospel { padding: 24px 22px 25px 23px; }
+    .gospel .g-head { font-size: 14px; }
+    .gospel blockquote { font-size: clamp(20px, 5.7vw, 23px); }
+    .guide { padding: 16px 18px; }
+    .guide .g-txt b { font-size: 16px; }
+    .duo .jubo { padding: 16px 13px; }
+    .nlist details.notice summary { padding: 15px 16px; }
+    .act { padding: 16px 14px; }
+  }
 </style>
 </head>
 <body>
