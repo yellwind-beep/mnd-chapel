@@ -9,14 +9,16 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@500;600;700&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" rel="stylesheet">
 <style>
 /* 말씀 전례만 모아 읽는 휴대폰용 페이지: 위쪽 시기 색 띠 → 날짜·전례일 → 붙어 다니는 목차 → 카드로 나눈 말씀 */
 :root{
   --s1:#2E6B4A; --s2:#1F4D35; --tint:#E9F1EB;          /* 전례 시기 색 (스크립트가 바꿈) */
   --bg:#F7F5EF; --paper:#FFFEFA; --ink:#1C2420; --sub:#66716B; --line:#E5E1D6;
   --people:#1E56B8; --people-soft:#E9EFFB; --rub:#B4473B;
-  --fs:18.5px;
+  --fs:20px;
   --serif:"Noto Serif KR","Nanum Myeongjo","Apple Myungjo",serif;
+  --read:"Pretendard Variable",Pretendard,"Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic",system-ui,sans-serif;  /* 본문: 휴대폰에서 또렷한 고딕 */
   --sans:Pretendard,"Pretendard Variable","Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic",system-ui,sans-serif;
 }
 @media (prefers-color-scheme:dark){ :root:not(.light){
@@ -54,7 +56,7 @@ a{color:inherit}
 .nav .row{display:flex; gap:6px; overflow-x:auto; scrollbar-width:none;
   padding:9px max(14px,env(safe-area-inset-right)) 9px max(14px,env(safe-area-inset-left))}
 .nav .row::-webkit-scrollbar{display:none}
-.nav a{flex:none; text-decoration:none; font-size:.74em; font-weight:700; color:var(--sub);
+.nav a{flex:none; text-decoration:none; font-size:.84em; font-weight:700; color:var(--sub);
   padding:6px 12px; border-radius:99px; border:1px solid var(--line); background:var(--paper)}
 .nav a.on{background:var(--s1); border-color:var(--s1); color:#fff}
 
@@ -65,34 +67,34 @@ main{max-width:640px; margin:0 auto; padding:6px max(16px,env(safe-area-inset-ri
 /* 말씀 카드 */
 .sec{scroll-margin-top:58px; margin-top:22px}
 .label{display:flex; align-items:baseline; justify-content:space-between; gap:12px; margin:0 4px 8px}
-.label h2{margin:0; font-size:.78em; font-weight:800; letter-spacing:.12em; color:var(--s1)}
+.label h2{margin:0; font-size:.98em; font-weight:800; letter-spacing:.08em; color:var(--s1)}
 :root.dark .label h2{color:var(--sub)}
 @media (prefers-color-scheme:dark){:root:not(.light) .label h2{color:var(--sub)}}
-.label .ref{font-size:.72em; color:var(--sub); font-weight:600; text-align:right}
+.label .ref{font-size:.82em; color:var(--sub); font-weight:600; text-align:right}
 .card{background:var(--paper); border:1px solid var(--line); border-radius:20px; padding:20px 20px 22px}
-.title{font:600 .9em/1.6 var(--serif); color:var(--s1); background:color-mix(in srgb,var(--s1) 11%,var(--paper)); border-radius:12px; padding:10px 14px; margin-bottom:14px}
+.title{font:600 .95em/1.6 var(--read); color:var(--s1); background:color-mix(in srgb,var(--s1) 11%,var(--paper)); border-radius:12px; padding:10px 14px; margin-bottom:14px}
 :root.dark .title{color:var(--ink)}
 @media (prefers-color-scheme:dark){:root:not(.light) .title{color:var(--ink)}}
-.body{font-family:var(--serif); font-weight:500; line-height:1.9}
+.body{font-family:var(--read); font-weight:500; line-height:1.85; letter-spacing:-.005em}
 .body p+p{margin-top:.1em}
-.ant{font:500 1em/1.85 var(--serif)}
-.end{margin-top:14px; padding-top:12px; border-top:1px dashed var(--line); font-size:.84em; color:var(--sub)}
+.ant{font:500 1em/1.85 var(--read)}
+.end{margin-top:14px; padding-top:12px; border-top:1px dashed var(--line); font-size:.92em; color:var(--sub)}
 .end b{color:var(--people); font-weight:700}
 
 /* 화답송 */
-.resp{font:700 1em/1.7 var(--serif); color:var(--people); background:var(--people-soft); border-radius:12px; padding:11px 14px}
-.resp small{display:block; font:700 .62em/1.4 var(--sans); letter-spacing:.12em; color:var(--sub); margin-bottom:2px}
-.st{font-family:var(--serif); font-weight:500; line-height:1.9; padding-top:14px; margin-top:14px; border-top:1px dashed var(--line)}
+.resp{font:700 1em/1.7 var(--read); color:var(--people); background:var(--people-soft); border-radius:12px; padding:11px 14px}
+.resp small{display:block; font:700 .72em/1.4 var(--sans); letter-spacing:.12em; color:var(--sub); margin-bottom:2px}
+.st{font-family:var(--read); font-weight:500; line-height:1.85; padding-top:14px; margin-top:14px; border-top:1px dashed var(--line)}
 .st .r{margin-top:6px; color:var(--people); font-weight:700; font-size:.92em}
 
 /* 복음 */
 .gospel .card{border:none; background:var(--paper); box-shadow:0 0 0 1.5px var(--s1) inset, 0 10px 28px rgba(0,0,0,.06)}
 .gospel .label h2::before{content:"✠ "}
-.acc{font:700 .9em/1.7 var(--serif); color:var(--people); margin-bottom:12px}
+.acc{font:700 .95em/1.7 var(--read); color:var(--people); margin-bottom:12px}
 
 /* 영성체송 */
 .cs+.cs{margin-top:14px; padding-top:14px; border-top:1px dashed var(--line)}
-.cs .src{font-size:.72em; color:var(--sub); font-weight:600; margin-bottom:4px}
+.cs .src{font-size:.82em; color:var(--sub); font-weight:600; margin-bottom:4px}
 .or{display:block; text-align:center; font-size:.7em; letter-spacing:.3em; color:var(--sub); margin:12px 0 0}
 
 .full{display:flex; align-items:center; justify-content:space-between; gap:10px; margin-top:28px; padding:16px 18px; border-radius:16px;
@@ -153,10 +155,10 @@ var root=document.documentElement;
 /* 글자 크기·밝기 (전례문 페이지와 같은 설정을 함께 씀) */
 function get(k){try{return localStorage.getItem(k)}catch(e){return null}}
 function put(k,v){try{localStorage.setItem(k,v)}catch(e){}}
-var fs=parseFloat(get('word-fs')||'18.5'); if(!(fs>=14&&fs<=28)) fs=18.5;
+var fs=parseFloat(get('word-fs2')||'20'); if(!(fs>=14&&fs<=30)) fs=20;
 function applyFs(){root.style.setProperty('--fs',fs+'px')} applyFs();
-document.getElementById('inc').onclick=function(){fs=Math.min(28,fs+1.5);applyFs();put('word-fs',fs)};
-document.getElementById('dec').onclick=function(){fs=Math.max(14,fs-1.5);applyFs();put('word-fs',fs)};
+document.getElementById('inc').onclick=function(){fs=Math.min(30,fs+1.5);applyFs();put('word-fs2',fs)};
+document.getElementById('dec').onclick=function(){fs=Math.max(14,fs-1.5);applyFs();put('word-fs2',fs)};
 var m0=get('mass-mode'); if(m0) root.classList.add(m0);
 var mb=document.getElementById('mode');
 function isDark(){return root.classList.contains('dark')||(!root.classList.contains('light')&&matchMedia('(prefers-color-scheme:dark)').matches)}
