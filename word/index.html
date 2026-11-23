@@ -118,6 +118,8 @@ main.wait .sec,main.wait .full{display:none}
 .daybar a small{display:block; font-weight:600; color:var(--sub); font-size:.84em; margin-bottom:2px}
 .daybar .db-n{text-align:right}
 .daybar .off{visibility:hidden}
+.amen{margin-top:12px; padding-top:10px; border-top:1px dashed var(--line); color:var(--people); font-weight:700; font-size:.92em}
+.body.pr p+p{margin-top:.1em}
 </style>
 </head>
 <body>
@@ -191,6 +193,10 @@ function render(d){
   document.title=(d['전례일']||'오늘의 말씀')+' · 말씀';
   var h='', nav=[];
   if(d['입당송']){ h+=sec('w-in','입당송',d['입당송 출처'],'<p class="ant">'+esc(d['입당송'])+'</p>'); nav.push(['w-in','입당송']); }
+  var prayer=function(id,name,t){ var L=lines(t); if(!L.length) return ''; if(/^아멘\.?$/.test(L[L.length-1])) L.pop();
+    nav.push([id,name]);
+    return sec(id,name,'','<div class="body pr">'+L.map(function(p){return '<p>'+esc(p)+'</p>'}).join('')+'</div><p class="amen">◎ 아멘.</p>'); };
+  h+=prayer('w-co','본기도',d['본기도']);
   var reading=function(id,name,ref,title,body){ if(!lines(body).length) return '';
     nav.push([id,name]);
     return sec(id,name,ref,'<div class="body">'+paras(body)+'</div>'+
@@ -205,10 +211,12 @@ function render(d){
     h+=sec('w-gs','복음',d['복음 출처'],(ev?'<p class="acc" style="color:var(--sub);font-weight:600">'+esc(ev)+' 전한 거룩한 복음입니다.</p>':'')+
       '<div class="body">'+paras(d['복음 본문'])+'</div>'+
       '<p class="end">주님의 말씀입니다. <b>◎ 그리스도님, 찬미합니다.</b></p>','gospel'); }
+  h+=prayer('w-of','예물 기도',d['예물 기도']);
   var cs=blocks(d['영성체송']);
   if(cs.length){ nav.push(['w-cs','영성체송']);
     h+=sec('w-cs','영성체송','',cs.map(function(b){var src=b.length>1?b[0]:'', tx=b.length>1?b.slice(1).join(' '):b[0];
       return '<div class="cs">'+(src?'<p class="src">'+esc(src)+'</p>':'')+'<p class="ant">'+esc(tx)+'</p></div>'}).join('<span class="or">또는</span>')); }
+  h+=prayer('w-pc','영성체 후 기도',d['영성체 후 기도']);
   document.getElementById('wBody').innerHTML=h;
   document.getElementById('navRow').innerHTML=nav.map(function(n){return '<a href="#'+n[0]+'" data-t="'+n[0]+'">'+n[1]+'</a>'}).join('');
   document.getElementById('wFull').href='/mass/?d='+d.date;
