@@ -1014,6 +1014,18 @@ function fitTitles() {
 }
 window.addEventListener('resize', () => { fitAddr(); fitTitles(); fitVerse(); });
 if (document.fonts) document.fonts.ready.then(() => { fitAddr(); fitTitles(); fitVerse(); });
+// 다른 화면(전례문 등)에 갔다가 돌아와도 처음 연 것처럼: 맨 위에서 시작하고 글자 맞춤을 다시 함
+if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+const 처음처럼 = () => {
+  window.scrollTo(0, 0);
+  requestAnimationFrame(() => { fitAddr(); fitTitles(); fitVerse(); window.scrollTo(0, 0); });
+};
+window.addEventListener('pageshow', (e) => {
+  // 뒤로 가기로 예전 화면이 그대로 되살아난 경우(펼친 공지·상담 신청서 등)는 새로 열어 처음 상태로
+  if (e.persisted) { location.reload(); return; }
+  처음처럼();
+});
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') 처음처럼(); });
 
 load();
 
