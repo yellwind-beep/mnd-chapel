@@ -963,6 +963,7 @@ $('#chapelPick').addEventListener('click', (ev) => {
   if (b) {
     const id = b.dataset.id, same = id === chapel && getSaved(CHAPEL_KEY);
     chapel = id; setSaved(CHAPEL_KEY, id); closePick();
+    const nm = chapels.find((c) => c.id === id); if (nm) $('#chapelName').textContent = nm.name;
     if (!same) { window.scrollTo(0, 0); $('#nextWhen').textContent = '불러오는 중…'; $('#nextWhere').textContent = ''; load(); }
     return;
   }
