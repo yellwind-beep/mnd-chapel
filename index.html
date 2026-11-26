@@ -47,6 +47,25 @@
   header.top .wrap { display: flex; align-items: center; justify-content: space-between; height: 60px; gap: 12px; }
   .brand { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--ink); font-family: "Pretendard Variable", Pretendard, var(--sans); font-weight: 700; font-size: 20px; letter-spacing: -0.02em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .brand svg { flex: none; }
+  /* 성당 고르기 */
+  .chapel-btn { flex: none; display: inline-flex; align-items: center; gap: 4px; max-width: 48vw; font: 600 14px/1 var(--sans); color: var(--ink);
+    background: var(--surface); border: 1px solid var(--line); border-radius: 999px; padding: 8px 12px 8px 13px; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+  .chapel-btn span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .chapel-btn svg { flex: none; opacity: .6; }
+  .chapel-btn[hidden] { display: none; }
+  .pick { position: fixed; inset: 0; z-index: 50; display: flex; align-items: flex-end; justify-content: center; background: rgba(20,28,24,.45); }
+  .pick[hidden] { display: none; }
+  .pick .sheet { width: 100%; max-width: 480px; background: var(--bg); border-radius: 22px 22px 0 0; padding: 22px 18px calc(22px + env(safe-area-inset-bottom)); box-shadow: 0 -10px 30px rgba(0,0,0,.15); }
+  @media (min-width: 600px) { .pick { align-items: center; } .pick .sheet { border-radius: 22px; } }
+  .pick h2 { margin: 0; font-size: 20px; letter-spacing: -0.02em; }
+  .pick p { margin: 6px 0 16px; color: var(--muted); font-size: 14px; }
+  .pick ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+  .pick button.c { width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 10px; font: 600 17px/1.3 var(--sans); color: var(--ink);
+    text-align: left; background: var(--surface); border: 1.5px solid var(--line); border-radius: 14px; padding: 16px 18px; cursor: pointer; }
+  .pick button.c[aria-current="true"] { border-color: #2f4a3a; background: #eef3ef; }
+  .pick button.c small { font-weight: 500; font-size: 13px; color: #2f4a3a; }
+  .pick .close { margin-top: 12px; width: 100%; background: none; border: 0; font: 500 15px var(--sans); color: var(--muted); padding: 10px; cursor: pointer; }
+  .pick .close[hidden] { display: none; }
 
   /* 첫 화면 */
   .hero { padding: 6px 0 14px; }
@@ -477,10 +496,20 @@
   <div class="wrap">
     <a class="brand" href="#">
       <svg width="28" height="28" viewBox="72 72 368 368" aria-hidden="true"><rect x="72" y="72" width="368" height="368" rx="88" fill="#2f4a3a"/><g fill="none" stroke="#f6f3ec" stroke-width="22" stroke-linejoin="round" stroke-linecap="round"><path d="M256 108V152M236 126H276M222 214L256 162L290 214M222 398V214H290V398M222 244L140 294M290 244L372 294M150 290V398M362 290V398M128 398H384"/></g><path d="M240 398V362a16 16 0 0 1 32 0V398" fill="none" stroke="#c9a55a" stroke-width="18" stroke-linejoin="round"/><circle cx="256" cy="268" r="12" fill="none" stroke="#c9a55a" stroke-width="14"/></svg>
-      <span data-info="성당이름">군종교구 성당</span>
+      <span>군종교구 성당</span>
     </a>
+    <button type="button" class="chapel-btn" id="chapelBtn" hidden aria-haspopup="dialog" aria-label="성당 바꾸기"><span id="chapelName"></span><svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
   </div>
 </header>
+
+<div class="pick" id="chapelPick" role="dialog" aria-modal="true" aria-labelledby="pickTitle" hidden>
+  <div class="sheet">
+    <h2 id="pickTitle">다니는 성당을 골라 주세요</h2>
+    <p>고른 성당의 미사 시간·공지가 첫 화면에 나옵니다. 위쪽 성당 이름을 눌러 언제든 바꿀 수 있습니다.</p>
+    <ul id="pickList"></ul>
+    <button type="button" class="close" id="pickClose" hidden>닫기</button>
+  </div>
+</div>
 
 <main>
   <div class="wrap">
@@ -653,7 +682,18 @@ const SAMPLE = {
 
 const DAYS = ['일', '월', '화', '수', '목', '금', '토'];
 const DAY_ORDER = [0, 1, 2, 3, 4, 5, 6]; // 주일 먼저
-const CACHE_KEY = 'church-data-v1';
+/* 여러 성당: 고른 성당은 이 기기에 기억 (주소에 ?c=아이디 로도 지정 가능) */
+const CHAPEL_KEY = 'chapel';
+const getSaved = (k) => { try { return localStorage.getItem(k); } catch (e) { return null; } };
+const setSaved = (k, v) => { try { localStorage.setItem(k, v); } catch (e) {} };
+let chapel = '';
+(() => {
+  const q = new URLSearchParams(location.search).get('c');
+  if (q && /^[a-z0-9-]+$/i.test(q)) setSaved(CHAPEL_KEY, q.toLowerCase());
+  chapel = getSaved(CHAPEL_KEY) || '';
+})();
+let chapels = [];
+const cacheKey = () => 'church-data-v2-' + (chapel || 'default');
 const NOTICE_PAGE = matchMedia('(max-width: 480px)').matches ? 2 : 5;  // 휴대폰은 2개씩
 
 const $ = (s) => document.querySelector(s);
@@ -759,7 +799,8 @@ function render(data) {
     const v = info[el.dataset.info];
     if (v) el.textContent = v;
   });
-  if (info['성당이름']) document.title = info['성당이름'];
+  document.title = info['성당이름'] && info['성당이름'] !== '군종교구 성당' ? `${info['성당이름']} · 군종교구 성당` : '군종교구 성당';
+  showChapels(data);
   if (/^https?:\/\//.test(info['지도링크'] || '')) $('#mapLink').href = info['지도링크'];
   fitAddr();
 
@@ -895,15 +936,53 @@ async function showMassText(nextDt, fromSheet) {
   a.setAttribute('aria-label', `미사가 익숙하지 않아요: ${m.title} 미사 순서와 기도문 보기`);
 }
 
+/* 성당 이름 버튼과 고르기 창 */
+function showChapels(data) {
+  if (Array.isArray(data.chapels) && data.chapels.length) chapels = data.chapels;
+  const cur = chapels.find((c) => c.id === (data.chapel || chapel));
+  const btn = $('#chapelBtn');
+  btn.hidden = chapels.length < 2 || !cur;
+  if (cur) $('#chapelName').textContent = cur.name;
+  // 처음 오신 분: 성당이 둘 이상이면 먼저 고르게
+  if (chapels.length > 1 && !getSaved(CHAPEL_KEY) && $('#chapelPick').hidden) openPick(true);
+}
+function openPick(first) {
+  const cur = chapel || (chapels[0] && chapels[0].id);
+  $('#pickList').innerHTML = chapels.map((c) =>
+    `<li><button type="button" class="c" data-id="${esc(c.id)}" aria-current="${!first && c.id === cur}"><span>${esc(c.name)}</span>${!first && c.id === cur ? '<small>지금 보는 성당</small>' : ''}</button></li>`).join('');
+  $('#pickClose').hidden = !!first;
+  $('#chapelPick').hidden = false;
+  document.body.style.overflow = 'hidden';
+  const b = $('#pickList button'); if (b) b.focus({ preventScroll: true });
+}
+function closePick() { $('#chapelPick').hidden = true; document.body.style.overflow = ''; }
+$('#chapelBtn').addEventListener('click', () => openPick(false));
+$('#pickClose').addEventListener('click', closePick);
+$('#chapelPick').addEventListener('click', (ev) => {
+  const b = ev.target.closest('button.c');
+  if (b) {
+    const id = b.dataset.id, same = id === chapel && getSaved(CHAPEL_KEY);
+    chapel = id; setSaved(CHAPEL_KEY, id); closePick();
+    if (!same) { window.scrollTo(0, 0); $('#nextWhen').textContent = '불러오는 중…'; $('#nextWhere').textContent = ''; load(); }
+    return;
+  }
+  if (ev.target === ev.currentTarget && !$('#pickClose').hidden) closePick();
+});
+document.addEventListener('keydown', (ev) => { if (ev.key === 'Escape' && !$('#chapelPick').hidden && !$('#pickClose').hidden) closePick(); });
+
+let loadSeq = 0;
 async function load() {
   if (!SCRIPT_URL) { $('#previewBar').hidden = false; render(SAMPLE); return; }
+  const seq = ++loadSeq;
   // 이전에 받아둔 내용을 먼저 보여주고, 최신 내용으로 교체
-  try { const c = localStorage.getItem(CACHE_KEY); if (c) render(JSON.parse(c)); } catch (e) {}
+  try { const c = localStorage.getItem(cacheKey()); if (c) render(JSON.parse(c)); } catch (e) {}
   try {
-    const res = await fetch(SCRIPT_URL + '?t=' + Date.now());
+    const res = await fetch(SCRIPT_URL + '?chapel=' + encodeURIComponent(chapel) + '&t=' + Date.now());
     const data = await res.json();
+    if (seq !== loadSeq) return;   // 그 사이에 다른 성당을 고른 경우
+    if (!chapel && data.chapel) chapel = data.chapel;
     render(data);
-    try { localStorage.setItem(CACHE_KEY, JSON.stringify(data)); } catch (e) {}
+    try { localStorage.setItem(cacheKey(), JSON.stringify(data)); } catch (e) {}
   } catch (e) {
     if ($('#noticeList .skel')) {
       $('#noticeList').innerHTML = '<div class="card empty">내용을 불러오지 못했습니다. 잠시 후 다시 열어주세요.</div>';
@@ -929,6 +1008,7 @@ $('#consultForm').addEventListener('submit', async (ev) => {
   msg.className = 'msg'; msg.textContent = '';
   const data = Object.fromEntries(new FormData(f).entries());
   data.agree = $('#f-agree').checked;
+  data.chapel = chapel;
 
   if (!data.name.trim()) { msg.className = 'msg err'; msg.textContent = '이름 또는 세례명을 적어주세요.'; $('#f-name').focus(); return; }
   if (!data.contact.trim()) { msg.className = 'msg err'; msg.textContent = '연락받을 방법을 적어주세요.'; $('#f-contact').focus(); return; }

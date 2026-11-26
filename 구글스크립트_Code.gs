@@ -20,6 +20,7 @@ const 탭 = {
   복음: '복음',
   공지: '공지사항',
   상담: '상담신청',
+  성당: '성당목록',
 };
 
 const 상담_머리글 = ['접수일시', '접수번호', '이름(세례명)', '소속', '연락방법', '상담분야', '상담방식', '편한시간', '내용', '처리상태', '메모'];
@@ -39,12 +40,18 @@ function doGet(e) {
     }
     return json_({ mass: mass });
   }
+  // 성당별 내용(?chapel=아이디): 기본정보·미사시간·미사변경·공지사항은 그 성당 시트에서,
+  // 복음·전례문·주보·주교님 동정은 모든 성당이 함께 씀
+  const 성당 = 성당찾기_(ss, e && e.parameter && e.parameter.chapel);
+  const cs = 성당시트_(ss, 성당);
   return json_({
-    info: 키값읽기_(ss.getSheetByName(탭.정보)),
-    masses: 표읽기_(ss.getSheetByName(탭.미사)),
-    changes: 표읽기_(ss.getSheetByName(탭.변경)),
+    chapel: 성당.id,
+    chapels: 성당목록_(ss).map((c) => ({ id: c.id, name: c.name })),
+    info: 키값읽기_(cs.getSheetByName(탭.정보)),
+    masses: 표읽기_(cs.getSheetByName(탭.미사)),
+    changes: 표읽기_(cs.getSheetByName(탭.변경)),
     gospel: 표읽기_(ss.getSheetByName(탭.복음)),
-    notices: 표읽기_(ss.getSheetByName(탭.공지)),
+    notices: 표읽기_(cs.getSheetByName(탭.공지)),
     jubo: 주보_(),
     bishop: 동정_(),
     massTexts: 전례문목록_(ss),
@@ -176,7 +183,10 @@ function doPost(e) {
     if (!이름 || !연락) return json_({ ok: false, error: '이름과 연락 방법은 꼭 필요합니다.' });
     if (d.agree !== true) return json_({ ok: false, error: '개인정보 동의가 필요합니다.' });
 
-    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    // 고른 성당의 시트에 저장하고, 그 성당 신부님께 알림
+    const main = SpreadsheetApp.getActiveSpreadsheet();
+    const 성당 = 성당찾기_(main, d.chapel);
+    const ss = 성당시트_(main, 성당);
     const sh = 상담탭_(ss);
     const 지금 = new Date();
     const 번호 = Utilities.formatDate(지금, 'Asia/Seoul', 'MMdd') + '-' + Math.floor(100 + Math.random() * 900);
@@ -198,11 +208,13 @@ function doPost(e) {
     const r = sh.getLastRow() + 1;
     sh.getRange(r, 1, 1, 행.length).setNumberFormat('@').setValues([행]);
 
-    if (알림이메일) {
+    // 성당목록에 상담이메일이 없으면 기본 알림이메일로 (내용은 담지 않고 접수 사실만)
+    const 받는이 = 성당.email || 알림이메일;
+    if (받는이) {
       MailApp.sendEmail(
-        알림이메일,
-        '[성당 홈페이지] 새 상담 신청이 있습니다',
-        '새 상담 신청이 1건 접수되었습니다.\n아래 스프레드시트의 "상담신청" 탭에서 확인해 주세요.\n\n' + ss.getUrl()
+        받는이,
+        '[' + 성당.name + '] 새 상담 신청이 있습니다',
+        성당.name + '에 새 상담 신청이 1건 접수되었습니다.\n아래 스프레드시트의 "상담신청" 탭에서 확인해 주세요.\n\n' + ss.getUrl()
       );
     }
     return json_({ ok: true, id: 번호 });
@@ -508,6 +520,97 @@ function 날짜키_(v) {
 function 글날짜_(t) {
   const m = String(t || '').match(/(\d{4})\D+(\d{1,2})\D+(\d{1,2})/);
   return m ? new Date(+m[1], +m[2] - 1, +m[3]) : null;
+}
+
+/* ---------- 여러 성당 ----------
+ * 이 시트의 '성당목록' 탭에 성당을 한 줄씩 적습니다.
+ *   아이디 | 성당이름 | 시트주소 | 상담이메일
+ * - 시트주소가 비어 있으면 이 시트(기본 성당)를 씁니다.
+ * - 새 성당은 '성당추가' 함수의 이름을 바꿔 한 번 실행하면 시트가 만들어지고 목록에 들어갑니다.
+ * - 상담이메일은 홈페이지에 공개되지 않습니다.
+ */
+function 성당목록_(ss) {
+  const sh = ss.getSheetByName(탭.성당);
+  const 목록 = 표읽기_(sh)
+    .map((r) => ({
+      id: String(r['아이디'] || '').trim().toLowerCase(),
+      name: String(r['성당이름'] || '').trim(),
+      sheet: String(r['시트주소'] || '').trim(),
+      email: String(r['상담이메일'] || '').trim(),
+    }))
+    .filter((c) => /^[a-z0-9-]+$/.test(c.id) && c.name);
+  return 목록.length ? 목록 : [{ id: 'mnd', name: '국방부 성당', sheet: '', email: '' }];
+}
+
+function 성당찾기_(ss, id) {
+  const 목록 = 성당목록_(ss);
+  const k = String(id || '').trim().toLowerCase();
+  return 목록.find((c) => c.id === k) || 목록[0];
+}
+
+function 성당시트_(ss, 성당) {
+  if (!성당 || !성당.sheet) return ss;
+  try {
+    const m = 성당.sheet.match(/\/d\/([\w-]{20,})/) || 성당.sheet.match(/^([\w-]{20,})$/);
+    return m ? SpreadsheetApp.openById(m[1]) : ss;
+  } catch (err) {
+    console.warn('성당 시트 열기 실패(' + 성당.id + '): ' + err.message);
+    return ss;
+  }
+}
+
+// 처음 한 번: 성당목록 탭을 만들고 지금 성당을 기본 성당으로 넣음
+function setupChapels() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  탭만들기_(ss, 탭.성당, [
+    ['아이디', '성당이름', '시트주소', '상담이메일'],
+    ['mnd', '국방부 성당', '', 알림이메일],
+  ]);
+  const sh = ss.getSheetByName(탭.성당);
+  sh.getRange('A1').setNote('아이디: 영어 소문자·숫자로 (주소에 쓰임, 바꾸면 신자들이 다시 골라야 함)\n시트주소: 비우면 이 시트\n상담이메일: 상담 신청 알림을 받을 주소 (홈페이지에 공개되지 않음)');
+  sh.setColumnWidth(3, 380);
+  ss.toast('성당목록 탭을 만들었습니다.');
+}
+
+// 새 성당 추가: 아래 두 줄을 고친 뒤 이 함수를 실행
+function 성당추가() {
+  const 아이디 = 'central';
+  const 이름 = '국군중앙성당';
+  const main = SpreadsheetApp.getActiveSpreadsheet();
+  if (!main.getSheetByName(탭.성당)) setupChapels();
+  if (성당목록_(main).some((c) => c.id === 아이디)) { main.toast('이미 있는 아이디입니다: ' + 아이디); return; }
+
+  const ns = SpreadsheetApp.create(이름 + ' 홈페이지');
+  ns.setSpreadsheetTimeZone('Asia/Seoul');
+  탭만들기_(ns, 탭.정보, [
+    ['항목', '내용'],
+    ['성당이름', 이름],
+    ['소개', ''],
+    ['주소', '(주소를 적어 주세요)'],
+    ['오시는길', ''],
+    ['연락처', ''],
+    ['사무실시간', ''],
+    ['지도링크', 'https://map.naver.com/p/search/' + encodeURIComponent(이름)],
+  ]);
+  탭만들기_(ns, 탭.미사, [
+    ['이름', '요일', '시간', '장소', '비고'],
+    ['주일미사', '일', '10:00', 이름, '(시간을 확인해 고쳐 주세요)'],
+  ]);
+  탭만들기_(ns, 탭.변경, [['날짜', '시간', '장소', '안내', '이름']]);
+  ns.getSheetByName(탭.변경).getRange('A2:A').setNumberFormat('yyyy-mm-dd');
+  탭만들기_(ns, 탭.공지, [
+    ['날짜', '제목', '내용', '고정', '이미지'],
+    [Utilities.formatDate(new Date(), 'Asia/Seoul', 'yyyy-MM-dd'), 이름 + ' 홈페이지를 시작합니다', '미사 시간과 공지를 이곳에서 안내합니다.', '', ''],
+  ]);
+  상담탭_(ns);
+  ns.getSheetByName(탭.상담).getRange('J2:J').setDataValidation(
+    SpreadsheetApp.newDataValidation().requireValueInList(['접수', '연락함', '상담완료'], true).build());
+  const 첫탭 = ns.getSheetByName('Sheet1') || ns.getSheetByName('시트1');
+  if (첫탭 && ns.getSheets().length > 1) ns.deleteSheet(첫탭);
+
+  main.getSheetByName(탭.성당).appendRow([아이디, 이름, ns.getUrl(), '']);
+  main.toast(이름 + ' 시트를 만들었습니다: ' + ns.getUrl());
+  console.log(ns.getUrl());
 }
 
 /* ---------- 내부 도우미 ---------- */
