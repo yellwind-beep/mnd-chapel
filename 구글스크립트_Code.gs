@@ -42,21 +42,38 @@ function doGet(e) {
   }
   // 성당별 내용(?chapel=아이디): 기본정보·미사시간·미사변경·공지사항은 그 성당 시트에서,
   // 복음·전례문·주보·주교님 동정은 모든 성당이 함께 씀
+  // 성당이 많아져도 빠르도록 잠시(1~5분) 저장해 두고 다시 씀
   const 성당 = 성당찾기_(ss, e && e.parameter && e.parameter.chapel);
-  const cs = 성당시트_(ss, 성당);
-  return json_({
-    chapel: 성당.id,
-    chapels: 성당목록_(ss).map((c) => ({ id: c.id, name: c.name })),
-    info: 키값읽기_(cs.getSheetByName(탭.정보)),
-    masses: 표읽기_(cs.getSheetByName(탭.미사)),
-    changes: 표읽기_(cs.getSheetByName(탭.변경)),
+  const 공통 = 잠깐저장_('shared', 300, () => ({
+    chapels: 성당목록_(ss).map((c) => ({ id: c.id, name: c.name, group: c.group })),
     gospel: 표읽기_(ss.getSheetByName(탭.복음)),
-    notices: 표읽기_(cs.getSheetByName(탭.공지)),
+    massTexts: 전례문목록_(ss),
+  }));
+  const 내용 = 잠깐저장_('c:' + 성당.id, 60, () => {
+    const cs = 성당시트_(ss, 성당);
+    return {
+      info: 키값읽기_(cs.getSheetByName(탭.정보)),
+      masses: 표읽기_(cs.getSheetByName(탭.미사)),
+      changes: 표읽기_(cs.getSheetByName(탭.변경)),
+      notices: 표읽기_(cs.getSheetByName(탭.공지)),
+    };
+  });
+  return json_(Object.assign({ chapel: 성당.id }, 공통, 내용, {
     jubo: 주보_(),
     bishop: 동정_(),
-    massTexts: 전례문목록_(ss),
     updated: new Date().toISOString(),
-  });
+  }));
+}
+
+// 계산한 결과를 초 단위로 잠시 저장 (너무 크면 저장하지 않음)
+function 잠깐저장_(키, 초, 만들기) {
+  const cache = CacheService.getScriptCache();
+  const hit = cache.get(키);
+  if (hit) { try { return JSON.parse(hit); } catch (err) {} }
+  const o = 만들기();
+  const t = JSON.stringify(o);
+  if (t.length < 95000) { try { cache.put(키, t, 초); } catch (err) {} }
+  return o;
 }
 
 /* ---------- 미사 전례문 ----------
@@ -348,6 +365,7 @@ function 복음편집감지(e) {
     }
     return;
   }
+  if (이름 === 탭.성당) { 새성당만들기(); CacheService.getScriptCache().remove('shared'); return; }
   if (이름 === 탭.변경 || 이름 === 탭.미사) 복음채우기();
 }
 
@@ -524,10 +542,12 @@ function 글날짜_(t) {
 
 /* ---------- 여러 성당 ----------
  * 이 시트의 '성당목록' 탭에 성당을 한 줄씩 적습니다.
- *   아이디 | 성당이름 | 시트주소 | 상담이메일
- * - 시트주소가 비어 있으면 이 시트(기본 성당)를 씁니다.
- * - 새 성당은 '성당추가' 함수의 이름을 바꿔 한 번 실행하면 시트가 만들어지고 목록에 들어갑니다.
- * - 상담이메일은 홈페이지에 공개되지 않습니다.
+ *   아이디 | 성당이름 | 시트주소 | 상담이메일 | 군 | 공유계정 | 공유상태
+ * - 새 성당: 아이디·성당이름·군(육군/해군/공군/해병대/국직)만 적으면
+ *   그 성당 시트가 자동으로 만들어지고 시트주소가 채워집니다.
+ * - 공유계정에 그 성당 신부님의 구글(Gmail) 주소를 적으면 그 시트만 편집자로 공유됩니다.
+ * - 시트주소가 '기본'이면 이 시트(국방부 성당)를 씁니다.
+ * - 상담이메일·공유계정은 홈페이지에 공개되지 않습니다.
  */
 function 성당목록_(ss) {
   const sh = ss.getSheetByName(탭.성당);
@@ -537,9 +557,10 @@ function 성당목록_(ss) {
       name: String(r['성당이름'] || '').trim(),
       sheet: String(r['시트주소'] || '').trim(),
       email: String(r['상담이메일'] || '').trim(),
+      group: String(r['군'] || '').trim(),
     }))
     .filter((c) => /^[a-z0-9-]+$/.test(c.id) && c.name);
-  return 목록.length ? 목록 : [{ id: 'mnd', name: '국방부 성당', sheet: '', email: '' }];
+  return 목록.length ? 목록 : [{ id: 'mnd', name: '국방부 성당', sheet: '', email: '', group: '' }];
 }
 
 function 성당찾기_(ss, id) {
@@ -549,7 +570,7 @@ function 성당찾기_(ss, id) {
 }
 
 function 성당시트_(ss, 성당) {
-  if (!성당 || !성당.sheet) return ss;
+  if (!성당 || !성당.sheet || 성당.sheet === '기본') return ss;
   try {
     const m = 성당.sheet.match(/\/d\/([\w-]{20,})/) || 성당.sheet.match(/^([\w-]{20,})$/);
     return m ? SpreadsheetApp.openById(m[1]) : ss;
@@ -563,8 +584,8 @@ function 성당시트_(ss, 성당) {
 function setupChapels() {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
   탭만들기_(ss, 탭.성당, [
-    ['아이디', '성당이름', '시트주소', '상담이메일'],
-    ['mnd', '국방부 성당', '', 알림이메일],
+    ['아이디', '성당이름', '시트주소', '상담이메일', '군', '공유계정', '공유상태'],
+    ['mnd', '국방부 성당', '기본', 알림이메일, '국직', '', ''],
   ]);
   const sh = ss.getSheetByName(탭.성당);
   sh.getRange('A1').setNote('아이디: 영어 소문자·숫자로 (주소에 쓰임, 바꾸면 신자들이 다시 골라야 함)\n시트주소: 비우면 이 시트\n상담이메일: 상담 신청 알림을 받을 주소 (홈페이지에 공개되지 않음)');
@@ -572,14 +593,50 @@ function setupChapels() {
   ss.toast('성당목록 탭을 만들었습니다.');
 }
 
-// 새 성당 추가: 아래 두 줄을 고친 뒤 이 함수를 실행
-function 성당추가() {
-  const 아이디 = 'central';
-  const 이름 = '국군중앙성당';
-  const main = SpreadsheetApp.getActiveSpreadsheet();
-  if (!main.getSheetByName(탭.성당)) setupChapels();
-  if (성당목록_(main).some((c) => c.id === 아이디)) { main.toast('이미 있는 아이디입니다: ' + 아이디); return; }
+// 새 성당 만들기: '성당목록'에서 시트주소가 빈 줄마다 시트를 만들고, 공유계정이 있으면 공유
+// (성당목록 탭을 고치면 자동으로 실행됩니다. 직접 실행해도 됩니다)
+function 새성당만들기() {
+  const lock = LockService.getScriptLock();
+  if (!lock.tryLock(20000)) return;
+  try {
+    const main = SpreadsheetApp.getActiveSpreadsheet();
+    const sh = main.getSheetByName(탭.성당);
+    if (!sh) return;
+    const v = sh.getDataRange().getValues();
+    const 머리 = v[0].map((h) => String(h).trim());
+    const 열 = (이름) => {
+      let i = 머리.indexOf(이름);
+      if (i < 0) { i = 머리.length; 머리.push(이름); sh.getRange(1, i + 1).setValue(이름).setFontWeight('bold').setBackground('#e6ece6'); }
+      return i;
+    };
+    const cId = 열('아이디'), cName = 열('성당이름'), cSheet = 열('시트주소'), cShare = 열('공유계정'), cState = 열('공유상태');
+    for (let r = 1; r < v.length; r++) {
+      const id = String(v[r][cId] || '').trim().toLowerCase();
+      const name = String(v[r][cName] || '').trim();
+      if (!/^[a-z0-9-]+$/.test(id) || !name) continue;
+      let url = String(v[r][cSheet] || '').trim();
+      if (!url) {
+        url = 성당시트새로_(name).getUrl();
+        sh.getRange(r + 1, cSheet + 1).setValue(url);
+      }
+      const 계정 = String(v[r][cShare] || '').trim();
+      const 상태 = String(v[r][cState] || '').trim();
+      if (계정 && url !== '기본' && 상태 !== '공유함: ' + 계정) {
+        try {
+          const m = url.match(/\/d\/([\w-]{20,})/);
+          if (m) SpreadsheetApp.openById(m[1]).addEditor(계정);
+          sh.getRange(r + 1, cState + 1).setValue('공유함: ' + 계정);
+        } catch (err) {
+          sh.getRange(r + 1, cState + 1).setValue('공유 실패: ' + err.message.slice(0, 80));
+        }
+      }
+    }
+  } finally {
+    lock.releaseLock();
+  }
+}
 
+function 성당시트새로_(이름) {
   const ns = SpreadsheetApp.create(이름 + ' 홈페이지');
   ns.setSpreadsheetTimeZone('Asia/Seoul');
   탭만들기_(ns, 탭.정보, [
@@ -607,10 +664,12 @@ function 성당추가() {
     SpreadsheetApp.newDataValidation().requireValueInList(['접수', '연락함', '상담완료'], true).build());
   const 첫탭 = ns.getSheetByName('Sheet1') || ns.getSheetByName('시트1');
   if (첫탭 && ns.getSheets().length > 1) ns.deleteSheet(첫탭);
-
-  main.getSheetByName(탭.성당).appendRow([아이디, 이름, ns.getUrl(), '']);
-  main.toast(이름 + ' 시트를 만들었습니다: ' + ns.getUrl());
-  console.log(ns.getUrl());
+  // 제목 줄은 이 시트 주인만 고칠 수 있게 (경고만 띄움: 실수 방지)
+  ns.getSheets().forEach((t) => {
+    const p = t.getRange(1, 1, 1, t.getLastColumn() || 1).protect().setDescription('제목 줄: 바꾸면 홈페이지가 내용을 못 읽습니다');
+    p.setWarningOnly(true);
+  });
+  return ns;
 }
 
 /* ---------- 내부 도우미 ---------- */
