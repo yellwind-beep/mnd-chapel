@@ -669,6 +669,7 @@ function 성당시트새로_(이름) {
     const p = t.getRange(1, 1, 1, t.getLastColumn() || 1).protect().setDescription('제목 줄: 바꾸면 홈페이지가 내용을 못 읽습니다');
     p.setWarningOnly(true);
   });
+  ns.getSheetByName(탭.정보).getRange('A:A').protect().setDescription('항목 이름(A열): 바꾸면 홈페이지가 내용을 못 읽습니다').setWarningOnly(true);
   return ns;
 }
 
