@@ -1,9 +1,9 @@
-/* 국방부 성당 앱 - 오프라인 대비용 서비스 워커
+/* 군종교구 성당 앱 - 오프라인 대비용 서비스 워커
  * - 홈페이지 파일: 항상 인터넷에서 새로 받고, 끊겼을 때만 저장본을 보여줌
  * - 글꼴: 한 번 받으면 저장본 사용
  * - 공지·미사 시간(구글 스크립트)은 건드리지 않음 (홈페이지가 따로 저장해 둠)
  */
-const CACHE = 'chapel-v43';
+const CACHE = 'chapel-v44';
 const CORE = ['/', '/index.html', '/manifest.webmanifest', '/icons/icon-192.png', '/icons/favicon.svg'];
 const FONT_HOSTS = ['fonts.googleapis.com', 'fonts.gstatic.com', 'cdn.jsdelivr.net'];
 
